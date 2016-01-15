@@ -11,3 +11,6 @@ add_executable(FinansCmd
 target_link_libraries(FinansCmd
 	FinansCore
 )
+target_link_libraries(FinansCmd
+	FinansCore
+)

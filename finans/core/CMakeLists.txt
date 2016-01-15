@@ -24,3 +24,9 @@ add_library(FinansCore
 	${generated}
 	${pbjson_src}
 )
+
+target_link_libraries(FinansCore
+	${PROTOBUF_LIBRARIES}
+)
+
+

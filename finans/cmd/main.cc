@@ -3,6 +3,9 @@
 #include "finans/core/finans.h"
 
 void main() {
-  Finans finans;
-  std::cout << "Hello " << finans.fyra() << " world\n";
+  auto finans = Finans::CreateNew();
+  if (finans == nullptr) {
+    std::cout << "Finans is not installed\n";
+  }
+  std::cout << "Hello world\n";
 }

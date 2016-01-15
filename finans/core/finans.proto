@@ -58,3 +58,7 @@ message Finans {
 	repeated ExternalExchange external_exchanges = 5;
 	repeated InternalExchange internal_exchanges = 6;
 }
+
+message DeviceConfigutation {
+	optional string finans_path = 1;
+}
