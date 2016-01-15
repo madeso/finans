@@ -1,4 +1,5 @@
-# finans
+![screenshot](gfx/logo/logo-github.png)
+
 Finans is a personal budgeting framework inspired by YNAB. It is also the swedish word for finance.
 
 Finans is built around a core, with several interfaces:
