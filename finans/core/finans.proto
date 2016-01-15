@@ -1,0 +1,60 @@
+package finans;
+
+/*
+Due to floating point rounding issues all currency values are represented as integers
+multiplied by 100 ie $1.20 is repsresented as the integer 120.
+*/
+
+/* could be an account or a wallet */
+message Account {
+	optional string name = 1;
+	optional int32 currency = 2;
+	optional int32 value = 3;
+}
+
+message Company {
+	optional string name = 1;
+}
+
+
+message Currency {
+	optional string full_name = 1; /* Example: american dollar, swedish krona */
+	optional string short_name = 2; /* USD, SEK */
+
+	/* USD: $20, SEK: 20 kr */
+	optional string value_before = 3;
+	optional string value_after = 4;
+}
+
+/* Also called an envelope */
+message Category {
+	optional string name = 1;
+}
+
+/* from company to account or vice versa */
+message ExternalExchange {
+	optional int32 category = 1;
+	optional int32 value = 2;
+	optional int32 company = 3;
+	optional int32 account = 4;
+	optional int64 when = 5;
+}
+
+/* between accounts */
+message InternalExchange {
+	optional int32 from_value = 1;
+	optional int32 to_value = 2;
+	optional int32 from_account = 3;
+	optional int32 to_account = 4;
+	optional int64 when = 5;
+}
+
+message Finans {
+	repeated Account accounts = 1;
+	repeated Company companies = 2;
+	repeated Currency currencies = 3;
+
+	repeated Category categories = 4;
+	repeated ExternalExchange external_exchanges = 5;
+	repeated InternalExchange internal_exchanges = 6;
+}
