@@ -5,7 +5,7 @@
 #include "tclap/CmdLine.h"
 
 const std::string USAGE_AND_HELP =
-"Usage: finans CMD ARGUMENTS\n"
+"Usage: fin CMD ARGUMENTS\n"
 "Where ARGUMENTS depends on CMD\n"
 "and CMD is one of:\n"
 "* help\n"
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     return cmd_status(cmd_args);
   }
   if (cmd == "install") {
-    return cmd_status(cmd_args);
+    return cmd_install(cmd_args);
   }
 
   std::cerr << "Unknown command " << cmd << ".\n";

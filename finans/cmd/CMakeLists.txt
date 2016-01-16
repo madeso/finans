@@ -16,3 +16,7 @@ target_link_libraries(FinansCmd
 target_link_libraries(FinansCmd
 	FinansCore
 )
+
+set_target_properties(FinansCmd PROPERTIES
+	OUTPUT_NAME "fin"
+)

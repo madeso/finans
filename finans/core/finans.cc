@@ -12,11 +12,11 @@ const std::string DEFAULT_NAME = "finans.json";
 
 std::shared_ptr<Finans> Finans::CreateNew() {
   finans::DeviceConfigutation device;
-  if( false == LoadConfiguration(&device) ) throw "Unable to load configuration";
+  if( false == LoadConfiguration(&device) ) throw "Unable to load configuration, install required";
 
   std::shared_ptr<Finans> f(new Finans(""));
   const auto target = EndWithSlash(device.finans_path()) + DEFAULT_NAME;
-  if (FileExist(target) == false) throw "Missing " + DEFAULT_NAME;
+  if (FileExist(target) == false) throw "Missing " + DEFAULT_NAME + ", create required";
   f->Load();
   return f;
 }
