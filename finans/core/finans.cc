@@ -55,10 +55,21 @@ int Finans::NumberOfAccounts() {
   return finans_->accounts_size();
 }
 
+int Finans::GetAccountByName(const std::string& short_name) {
+  const auto name = ToLower(short_name);
+  for (int i = 0; i < finans_->accounts_size(); ++i) {
+    if (ToLower(finans_->accounts(i).short_name()) == name) return i;
+  }
+
+  return -1;
+}
+
 void Finans::AddAccount(const std::string& long_name, const std::string& short_name, int currency) {
+  auto sn = Trim(short_name);
+  if (GetAccountByName(sn) != -1) throw "Account already added";
   auto* a = finans_->add_accounts();
-  a->set_long_name(long_name);
-  a->set_short_name(short_name);
+  a->set_long_name(Trim(long_name));
+  a->set_short_name(sn);
   a->set_prefered_currency(currency);
 }
 
@@ -69,7 +80,7 @@ int Finans::NumberOfCurrencies() {
 }
 
 int Finans::GetCurrencyByName(const std::string& short_name) const {
-  auto name = ToLower(short_name);
+  const auto name = ToLower(short_name);
   for (int i = 0; i < finans_->currencies_size(); ++i) {
     if ( ToLower(finans_->currencies(i).short_name()) == name) return i;
   }
@@ -81,7 +92,7 @@ void Finans::AddCurency(const std::string& full_name, const std::string& short_n
   const auto sn = Trim(short_name);
   if (GetCurrencyByName(sn) != -1) throw "Currency already added";
   auto* cur = finans_->add_currencies();
-  cur->set_full_name(full_name);
+  cur->set_full_name(Trim(full_name));
   cur->set_short_name(sn);
   cur->set_value_before(before);
   cur->set_value_after(after);
