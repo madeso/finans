@@ -65,12 +65,29 @@ int Finans::GetAccountByName(const std::string& short_name) {
 }
 
 void Finans::AddAccount(const std::string& long_name, const std::string& short_name, int currency) {
+  if (currency == -1) throw "Invalid currency";
+
   auto sn = Trim(short_name);
   if (GetAccountByName(sn) != -1) throw "Account already added";
   auto* a = finans_->add_accounts();
   a->set_long_name(Trim(long_name));
   a->set_short_name(sn);
+
   a->set_prefered_currency(currency);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+int Finans::NumberOfCompanies() {
+  return finans_->companies_size();
+}
+
+void Finans::AddCompany(const std::string& name, int currency) {
+  if (currency == -1) throw "Invalid currency";
+
+  auto* c = finans_->add_companies();
+  c->set_name(Trim(name));
+  c->set_currency(currency);
 }
 
 //////////////////////////////////////////////////////////////////////////

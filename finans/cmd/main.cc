@@ -45,6 +45,7 @@ int cmd_status(std::vector<std::string> args) {
 
     auto finans = Finans::CreateNew();
     std::cout << "Number of accounts: " << finans->NumberOfAccounts() << "\n";
+    std::cout << "Number of companies: " << finans->NumberOfCompanies() << "\n";
     std::cout << "Number of currencies: " << finans->NumberOfCurrencies() << "\n";
   }
   catch (...)
@@ -82,7 +83,7 @@ int cmd_addaccount(std::vector<std::string> args) {
     TCLAP::CmdLine cmd("Add a account to finans", ' ', "", false);
     TCLAP::ValueArg<std::string> longNamneArg("n", "name", "The name, ie. 'My card'", true, "", "string", cmd);
     TCLAP::ValueArg<std::string> shortNameArg("s", "short-name", "The short name ie. Visa", true, "", "string", cmd);
-    TCLAP::ValueArg<std::string> currencyArg("c", "currency", "The string after a value, ie. the kr in 45 kr", true, "", "string", cmd);
+    TCLAP::ValueArg<std::string> currencyArg("c", "currency", "The default currency for this account", true, "", "string", cmd);
     cmd.parse(args);
 
     auto finans = Finans::CreateNew();
@@ -91,6 +92,28 @@ int cmd_addaccount(std::vector<std::string> args) {
     finans->AddAccount(longNamneArg.getValue(), shortNameArg.getValue(), currency);
     finans->Save();
     std::cout << "Added " << shortNameArg.getValue() << ".\n";
+  }
+  catch (...)
+  {
+    return ExceptionHandler();
+  }
+
+  return 0;
+}
+
+int cmd_addcompany(std::vector<std::string> args) {
+  try {
+    TCLAP::CmdLine cmd("Add a company to finans", ' ', "", false);
+    TCLAP::ValueArg<std::string> nameArg("n", "name", "The name, ie. 'Acme'", true, "", "string", cmd);
+    TCLAP::ValueArg<std::string> currencyArg("c", "currency", "The default currency this company works in", true, "", "string", cmd);
+    cmd.parse(args);
+
+    auto finans = Finans::CreateNew();
+    auto currency = finans->GetCurrencyByName(currencyArg.getValue());
+    if (currency == -1) throw "Unknown currency";
+    finans->AddCompany(nameArg.getValue(), currency);
+    finans->Save();
+    std::cout << "Added " << nameArg.getValue() << ".\n";
   }
   catch (...)
   {
@@ -160,6 +183,9 @@ int main(int argc, char** argv) {
   }
   if (cmd == "addacc") {
     return cmd_addaccount(cmd_args);
+  }
+  if (cmd == "addcom") {
+    return cmd_addcompany(cmd_args);
   }
 
   std::cerr << "Unknown command " << cmd << ".\n";

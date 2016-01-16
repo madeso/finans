@@ -25,6 +25,11 @@ public:
   int NumberOfAccounts();
   int GetAccountByName(const std::string& short_name);
   void AddAccount(const std::string& long_name, const std::string& short_name, int currency);
+
+public:
+  int NumberOfCompanies();
+  void AddCompany(const std::string& name, int currency);
+
 public:
   int NumberOfCurrencies();
   int GetCurrencyByName(const std::string& short_name) const;
