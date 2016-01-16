@@ -12,9 +12,10 @@ in another coutry and don't yet know the transaction/exchange rate
 so there is a prefered currecy and a list of currency/values
 */
 message Account {
-	optional string name = 1;
-	repeated Money money = 2;
-	optional int32 prefered_currency = 3;
+	optional string long_name = 1;
+	optional string short_name = 2;
+	repeated Money money = 3;
+	optional int32 prefered_currency = 4;
 }
 
 message Money {

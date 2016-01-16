@@ -77,6 +77,29 @@ int cmd_addcurrecy(std::vector<std::string> args) {
   return 0;
 }
 
+int cmd_addaccount(std::vector<std::string> args) {
+  try {
+    TCLAP::CmdLine cmd("Add a account to finans", ' ', "", false);
+    TCLAP::ValueArg<std::string> longNamneArg("n", "name", "The name, ie. 'My card'", true, "", "string", cmd);
+    TCLAP::ValueArg<std::string> shortNameArg("s", "short-name", "The short name ie. Visa", true, "", "string", cmd);
+    TCLAP::ValueArg<std::string> currencyArg("c", "currency", "The string after a value, ie. the kr in 45 kr", true, "", "string", cmd);
+    cmd.parse(args);
+
+    auto finans = Finans::CreateNew();
+    auto currency = finans->GetCurrencyByName(currencyArg.getValue());
+    if (currency == -1) throw "Unknown currency";
+    finans->AddAccount(longNamneArg.getValue(), shortNameArg.getValue(), currency);
+    finans->Save();
+    std::cout << "Added " << shortNameArg.getValue() << ".\n";
+  }
+  catch (...)
+  {
+    return ExceptionHandler();
+  }
+
+  return 0;
+}
+
 int cmd_install(std::vector<std::string> args) {
   try {
     TCLAP::CmdLine cmd("Install finans to your system", ' ', "", false);
@@ -134,6 +157,9 @@ int main(int argc, char** argv) {
   }
   if (cmd == "addcurr") {
     return cmd_addcurrecy(cmd_args);
+  }
+  if (cmd == "addacc") {
+    return cmd_addaccount(cmd_args);
   }
 
   std::cerr << "Unknown command " << cmd << ".\n";

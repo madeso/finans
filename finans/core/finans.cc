@@ -55,6 +55,13 @@ int Finans::NumberOfAccounts() {
   return finans_->accounts_size();
 }
 
+void Finans::AddAccount(const std::string& long_name, const std::string& short_name, int currency) {
+  auto* a = finans_->add_accounts();
+  a->set_long_name(long_name);
+  a->set_short_name(short_name);
+  a->set_prefered_currency(currency);
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 int Finans::NumberOfCurrencies() {
