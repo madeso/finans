@@ -4,6 +4,6 @@ Finans is a personal budgeting framework inspired by YNAB. It is also the swedis
 
 Finans is built around a core, with several interfaces:
  * A commandline client
- * A gui for Windows/Linux/OsX
- * Possible in the future, a android application
+ * In the future, a gui for Windows/Linux/OS X
+ * In the future, a android application (both tablet and phone)
  * Possible in the future, a IOS application
