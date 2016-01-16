@@ -13,26 +13,61 @@ const std::string USAGE_AND_HELP =
 "* stat\n"
 ;
 
-int cmd_name(std::vector<std::string> args) {
+int ExceptionHandler() {
   try {
-    TCLAP::CmdLine cmd("Command description message", ' ', "", false);
-    TCLAP::ValueArg<std::string> nameArg("n", "name", "Name to print", true, "homer", "string");
-    cmd.add(nameArg);
-    TCLAP::SwitchArg reverseSwitch("r", "reverse", "Print name backwards", cmd, false);
-    cmd.parse(args);
-
-    std::string name = nameArg.getValue();
-    bool reverseName = reverseSwitch.getValue();
-
-    if (reverseName)
-      std::cout << "My name (spelled backwards) is: " << name << std::endl;
-    else
-      std::cout << "My name is: " << name << std::endl;
+    throw;
   }
   catch (TCLAP::ArgException &e)
   {
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
     return -12;
+  }
+  catch (const std::string& error) {
+    std::cerr << "error: " << error << "\n";
+    return -13;
+  }
+  catch (const char* error) {
+    std::cerr << "error: " << error << "\n";
+    return -14;
+  }
+  catch (...) {
+    std::cerr << "Unknown error.\n";
+    return -42;
+  }
+}
+
+int cmd_status(std::vector<std::string> args) {
+  try {
+    TCLAP::CmdLine cmd("Give the status of your finances", ' ', "", false);
+    cmd.parse(args);
+
+    auto finans = Finans::CreateNew();
+    std::cout << "Number of accounts: " << finans->NumberOfAccounts() << "\n";
+  }
+  catch (...)
+  {
+    return ExceptionHandler();
+  }
+
+  return 0;
+}
+
+int cmd_install(std::vector<std::string> args) {
+  try {
+    TCLAP::CmdLine cmd("Install finans to your system", ' ', "", false);
+    TCLAP::ValueArg<std::string> folderArg("f", "folder", "Where to install", true, "", "string", cmd);
+    TCLAP::SwitchArg dontCreateSwitch("c", "dont-create", "Don't create the finans database", cmd, false);
+    cmd.parse(args);
+
+    const std::string folder = folderArg.getValue();
+    const bool dontCreate = dontCreateSwitch.getValue();
+
+    Finans::Install(folder, !dontCreate);
+    std::cout << "Install complete.\n";
+  }
+  catch (...)
+  {
+    return ExceptionHandler();
   }
 
   return 0;
@@ -44,16 +79,6 @@ std::vector<std::string> Collect(int argc, char** argv) {
     ret.push_back(argv[i]);
   }
   return ret;
-}
-
-int useless() {
-  auto finans = Finans::CreateNew();
-  if (finans == nullptr) {
-    std::cout << "Finans is not installed\n";
-  }
-  std::cout << "Hello world\n";
-
-  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -74,8 +99,11 @@ int main(int argc, char** argv) {
   if (cmd == "help") {
     return 0;
   }
-  if (cmd == "name") {
-    return cmd_name(cmd_args);
+  if (cmd == "status" || cmd == "stat") {
+    return cmd_status(cmd_args);
+  }
+  if (cmd == "install") {
+    return cmd_status(cmd_args);
   }
 
   std::cerr << "Unknown command " << cmd << ".\n";

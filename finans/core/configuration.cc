@@ -23,10 +23,12 @@ bool LoadConfiguration(finans::DeviceConfigutation* device) {
   else return false; // error
 }
 
-void InstallConfiguration(const std::string& finans_path) {
+void InstallConfiguration(const std::string& finans_path, bool create_if_missing) {
   const auto path = DevicePath();
   finans::DeviceConfigutation device;
   device.set_finans_path(finans_path);
-  Finans::CreateDefault(finans_path);
+  if( create_if_missing ) {
+    Finans::CreateDefault(finans_path);
+  }
   SaveProtoJson(device, path);
 }

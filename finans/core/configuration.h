@@ -8,6 +8,6 @@
 #include "finans/core/finans-proto.h"
 
 bool LoadConfiguration(finans::DeviceConfigutation* device);
-void InstallConfiguration(const std::string& finans_path);
+void InstallConfiguration(const std::string& finans_path, bool create_if_missing);
 
 #endif  // CORE_CONFIGURATION_H_
