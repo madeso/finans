@@ -66,8 +66,8 @@ message Finans {
 	repeated Account accounts = 1;
 	repeated Company companies = 2;
 	repeated Currency currencies = 3;
-
 	repeated Category categories = 4;
+
 	repeated ExternalExchange external_exchanges = 5;
 	repeated InternalExchange internal_exchanges = 6;
 }

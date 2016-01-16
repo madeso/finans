@@ -125,3 +125,15 @@ void Finans::AddCurency(const std::string& full_name, const std::string& short_n
   cur->set_value_before(before);
   cur->set_value_after(after);
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+int Finans::NumberOfCategories() {
+  return finans_->categories_size();
+}
+
+void Finans::AddCategory(const std::string& name) {
+  const auto n = Trim(name);
+  auto* c = finans_->add_categories();
+  c->set_name(name);
+}

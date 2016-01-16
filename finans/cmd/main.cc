@@ -47,6 +47,7 @@ int cmd_status(std::vector<std::string> args) {
     std::cout << "Number of accounts: " << finans->NumberOfAccounts() << "\n";
     std::cout << "Number of companies: " << finans->NumberOfCompanies() << "\n";
     std::cout << "Number of currencies: " << finans->NumberOfCurrencies() << "\n";
+    std::cout << "Number of categories: " << finans->NumberOfCategories() << "\n";
   }
   catch (...)
   {
@@ -123,6 +124,25 @@ int cmd_addcompany(std::vector<std::string> args) {
   return 0;
 }
 
+int cmd_addcategory(std::vector<std::string> args) {
+  try {
+    TCLAP::CmdLine cmd("Add a category/envelope to finans", ' ', "", false);
+    TCLAP::ValueArg<std::string> nameArg("n", "name", "The name, ie. 'Savings'", true, "", "string", cmd);
+    cmd.parse(args);
+
+    auto finans = Finans::CreateNew();
+    finans->AddCategory(nameArg.getValue());
+    finans->Save();
+    std::cout << "Added " << nameArg.getValue() << ".\n";
+  }
+  catch (...)
+  {
+    return ExceptionHandler();
+  }
+
+  return 0;
+}
+
 int cmd_install(std::vector<std::string> args) {
   try {
     TCLAP::CmdLine cmd("Install finans to your system", ' ', "", false);
@@ -186,6 +206,9 @@ int main(int argc, char** argv) {
   }
   if (cmd == "addcom") {
     return cmd_addcompany(cmd_args);
+  }
+  if (cmd == "addcat") {
+    return cmd_addcategory(cmd_args);
   }
 
   std::cerr << "Unknown command " << cmd << ".\n";
