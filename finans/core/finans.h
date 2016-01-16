@@ -24,6 +24,10 @@ public:
 public:
   int NumberOfAccounts();
 
+public:
+  int NumberOfCurrencies();
+  void AddCurency(const std::string& full_name, const std::string& short_name, const std::string before, const std::string& after);
+
 private:
   Finans(const std::string& path);
   std::string path_;

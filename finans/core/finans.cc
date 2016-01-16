@@ -14,9 +14,9 @@ std::shared_ptr<Finans> Finans::CreateNew() {
   finans::DeviceConfigutation device;
   if( false == LoadConfiguration(&device) ) throw "Unable to load configuration, install required";
 
-  std::shared_ptr<Finans> f(new Finans(""));
   const auto target = EndWithSlash(device.finans_path()) + DEFAULT_NAME;
   if (FileExist(target) == false) throw "Missing " + DEFAULT_NAME + ", create required";
+  std::shared_ptr<Finans> f(new Finans(target));
   f->Load();
   return f;
 }
@@ -38,6 +38,8 @@ Finans::Finans(const std::string& path) : path_(path), finans_(new finans::Finan
 Finans::~Finans() {
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 void Finans::Load() {
   LoadProtoJson(finans_.get(), path_);
 }
@@ -46,6 +48,22 @@ void Finans::Save() {
   SaveProtoJson(*finans_.get(), path_);
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 int Finans::NumberOfAccounts() {
   return finans_->accounts_size();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+int Finans::NumberOfCurrencies() {
+  return finans_->currencies_size();
+}
+
+void Finans::AddCurency(const std::string& full_name, const std::string& short_name, const std::string before, const std::string& after) {
+  auto* cur = finans_->add_currencies();
+  cur->set_full_name(full_name);
+  cur->set_short_name(short_name);
+  cur->set_value_before(before);
+  cur->set_value_after(after);
 }

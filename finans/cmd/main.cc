@@ -36,6 +36,8 @@ int ExceptionHandler() {
   }
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 int cmd_status(std::vector<std::string> args) {
   try {
     TCLAP::CmdLine cmd("Give the status of your finances", ' ', "", false);
@@ -43,6 +45,29 @@ int cmd_status(std::vector<std::string> args) {
 
     auto finans = Finans::CreateNew();
     std::cout << "Number of accounts: " << finans->NumberOfAccounts() << "\n";
+    std::cout << "Number of currencies: " << finans->NumberOfCurrencies() << "\n";
+  }
+  catch (...)
+  {
+    return ExceptionHandler();
+  }
+
+  return 0;
+}
+
+int cmd_addcurrecy(std::vector<std::string> args) {
+  try {
+    TCLAP::CmdLine cmd("Add a currency to finans", ' ', "", false);
+    TCLAP::ValueArg<std::string> longNamneArg("n", "name", "The long name, ie. 'American Dollar'", true, "", "string", cmd);
+    TCLAP::ValueArg<std::string> shortNameArg("s", "short-name", "The short name ie. USD", true, "", "string", cmd);
+    TCLAP::ValueArg<std::string> beforeArg("b", "before", "The string before a value, ie. the $ in $99", false, "", "string", cmd);
+    TCLAP::ValueArg<std::string> afterArg("a", "after", "The string after a value, ie. the kr in 45 kr", false, "", "string", cmd);
+    cmd.parse(args);
+
+    auto finans = Finans::CreateNew();
+    finans->AddCurency(longNamneArg.getValue(), shortNameArg.getValue(), beforeArg.getValue(), afterArg.getValue());
+    finans->Save();
+    std::cout << "Added " << shortNameArg.getValue() << ".\n";
   }
   catch (...)
   {
@@ -72,6 +97,8 @@ int cmd_install(std::vector<std::string> args) {
 
   return 0;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 std::vector<std::string> Collect(int argc, char** argv) {
   std::vector<std::string> ret;
@@ -104,6 +131,9 @@ int main(int argc, char** argv) {
   }
   if (cmd == "install") {
     return cmd_install(cmd_args);
+  }
+  if (cmd == "addcurr") {
+    return cmd_addcurrecy(cmd_args);
   }
 
   std::cerr << "Unknown command " << cmd << ".\n";
