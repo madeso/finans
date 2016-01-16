@@ -28,6 +28,7 @@ public:
 
 public:
   int NumberOfCompanies();
+  int GetCompanyByName(const std::string& name);
   void AddCompany(const std::string& name, int currency);
 
 public:

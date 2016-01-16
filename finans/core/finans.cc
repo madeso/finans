@@ -82,8 +82,19 @@ int Finans::NumberOfCompanies() {
   return finans_->companies_size();
 }
 
+int Finans::GetCompanyByName(const std::string& name) {
+  const auto n = ToLower(name);
+  for (int i = 0; i < finans_->companies_size(); ++i) {
+    if (ToLower(finans_->companies(i).name()) == n) return i;
+  }
+
+  return -1;
+}
+
 void Finans::AddCompany(const std::string& name, int currency) {
   if (currency == -1) throw "Invalid currency";
+
+  if (GetCompanyByName(name) != -1) throw "Company already added";
 
   auto* c = finans_->add_companies();
   c->set_name(Trim(name));
