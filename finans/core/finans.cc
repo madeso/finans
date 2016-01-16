@@ -132,8 +132,18 @@ int Finans::NumberOfCategories() {
   return finans_->categories_size();
 }
 
+int Finans::GetCategoryByName(const std::string& name) {
+  const auto n = ToLower(name);
+  for (int i = 0; i < finans_->categories_size(); ++i) {
+    if (ToLower(finans_->categories(i).name()) == n) return i;
+  }
+
+  return -1;
+}
+
 void Finans::AddCategory(const std::string& name) {
   const auto n = Trim(name);
+  if (GetCategoryByName(n) != -1) throw "Category already added";
   auto* c = finans_->add_categories();
-  c->set_name(name);
+  c->set_name(n);
 }

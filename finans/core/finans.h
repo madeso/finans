@@ -38,6 +38,7 @@ public:
 
 public:
   int NumberOfCategories();
+  int GetCategoryByName(const std::string& name);
   void AddCategory(const std::string& name);
 
 private:
