@@ -26,6 +26,7 @@ public:
 
 public:
   int NumberOfCurrencies();
+  int GetCurrencyByName(const std::string& short_name) const;
   void AddCurency(const std::string& full_name, const std::string& short_name, const std::string before, const std::string& after);
 
 private:

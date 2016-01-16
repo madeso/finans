@@ -7,6 +7,7 @@
 #include "finans/core/os.h"
 #include "finans/core/file.h"
 #include "finans/core/proto.h"
+#include "finans/core/stringutils.h"
 
 const std::string DEFAULT_NAME = "finans.json";
 
@@ -60,10 +61,21 @@ int Finans::NumberOfCurrencies() {
   return finans_->currencies_size();
 }
 
+int Finans::GetCurrencyByName(const std::string& short_name) const {
+  auto name = ToLower(short_name);
+  for (int i = 0; i < finans_->currencies_size(); ++i) {
+    if ( ToLower(finans_->currencies(i).short_name()) == name) return i;
+  }
+
+  return -1;
+}
+
 void Finans::AddCurency(const std::string& full_name, const std::string& short_name, const std::string before, const std::string& after) {
+  const auto sn = Trim(short_name);
+  if (GetCurrencyByName(sn) != -1) throw "Currency already added";
   auto* cur = finans_->add_currencies();
   cur->set_full_name(full_name);
-  cur->set_short_name(short_name);
+  cur->set_short_name(sn);
   cur->set_value_before(before);
   cur->set_value_after(after);
 }
