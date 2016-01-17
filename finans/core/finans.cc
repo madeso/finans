@@ -51,11 +51,11 @@ void Finans::Save() {
 
 //////////////////////////////////////////////////////////////////////////
 
-int Finans::NumberOfAccounts() {
+int Finans::NumberOfAccounts() const {
   return finans_->accounts_size();
 }
 
-int Finans::GetAccountByName(const std::string& short_name) {
+int Finans::GetAccountByName(const std::string& short_name) const {
   const auto name = ToLower(short_name);
   for (int i = 0; i < finans_->accounts_size(); ++i) {
     if (ToLower(finans_->accounts(i).short_name()) == name) return i;
@@ -78,11 +78,11 @@ void Finans::AddAccount(const std::string& long_name, const std::string& short_n
 
 //////////////////////////////////////////////////////////////////////////
 
-int Finans::NumberOfCompanies() {
+int Finans::NumberOfCompanies() const {
   return finans_->companies_size();
 }
 
-int Finans::GetCompanyByName(const std::string& name) {
+int Finans::GetCompanyByName(const std::string& name) const {
   const auto n = ToLower(name);
   for (int i = 0; i < finans_->companies_size(); ++i) {
     if (ToLower(finans_->companies(i).name()) == n) return i;
@@ -103,7 +103,7 @@ void Finans::AddCompany(const std::string& name, int currency) {
 
 //////////////////////////////////////////////////////////////////////////
 
-int Finans::NumberOfCurrencies() {
+int Finans::NumberOfCurrencies() const {
   return finans_->currencies_size();
 }
 
@@ -128,11 +128,11 @@ void Finans::AddCurency(const std::string& full_name, const std::string& short_n
 
 //////////////////////////////////////////////////////////////////////////
 
-int Finans::NumberOfCategories() {
+int Finans::NumberOfCategories() const {
   return finans_->categories_size();
 }
 
-int Finans::GetCategoryByName(const std::string& name) {
+int Finans::GetCategoryByName(const std::string& name) const {
   const auto n = ToLower(name);
   for (int i = 0; i < finans_->categories_size(); ++i) {
     if (ToLower(finans_->categories(i).name()) == n) return i;

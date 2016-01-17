@@ -22,23 +22,23 @@ public:
   void Save();
 
 public:
-  int NumberOfAccounts();
-  int GetAccountByName(const std::string& short_name);
+  int NumberOfAccounts() const;
+  int GetAccountByName(const std::string& short_name) const;
   void AddAccount(const std::string& long_name, const std::string& short_name, int currency);
 
 public:
-  int NumberOfCompanies();
-  int GetCompanyByName(const std::string& name);
+  int NumberOfCompanies() const;
+  int GetCompanyByName(const std::string& name) const;
   void AddCompany(const std::string& name, int currency);
 
 public:
-  int NumberOfCurrencies();
+  int NumberOfCurrencies() const;
   int GetCurrencyByName(const std::string& short_name) const;
   void AddCurency(const std::string& full_name, const std::string& short_name, const std::string before, const std::string& after);
 
 public:
-  int NumberOfCategories();
-  int GetCategoryByName(const std::string& name);
+  int NumberOfCategories() const;
+  int GetCategoryByName(const std::string& name) const;
   void AddCategory(const std::string& name);
 
 private:
