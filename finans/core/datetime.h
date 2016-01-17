@@ -14,7 +14,7 @@ protected:
   friend class DateTime;
   explicit RawDateTime(time_t time);
 public:
-  explicit RawDateTime(const DateTime& dt);
+  static RawDateTime FromLocalTime(const DateTime& dt);
   static RawDateTime CurrentTime();
 
   static double Difference(const RawDateTime& start, const RawDateTime& end);

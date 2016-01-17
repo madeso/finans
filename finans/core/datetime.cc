@@ -8,12 +8,9 @@
 RawDateTime::RawDateTime(time_t time) : time_(time) {
 }
 
-time_t ToTimeT(struct tm t) {
-  struct tm tt = t;
-  return mktime(&tt);
-}
-
-RawDateTime::RawDateTime(const DateTime& dt) : time_(ToTimeT(dt.time())) {
+RawDateTime RawDateTime::FromLocalTime(const DateTime& dt) {
+  struct tm tt = dt.time();
+  return RawDateTime(mktime(&tt));
 }
 
 RawDateTime RawDateTime::CurrentTime() {
