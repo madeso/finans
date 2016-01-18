@@ -5,6 +5,7 @@
 
 #include <ctime>
 #include <string>
+#include <cstdint>
 
 class RawDateTime;
 class DateTime;
@@ -15,6 +16,7 @@ protected:
   explicit RawDateTime(time_t time);
 public:
   static RawDateTime FromLocalTime(const DateTime& dt);
+  static RawDateTime FromGmt(const DateTime& dt);
   static RawDateTime CurrentTime();
 
   static double Difference(const RawDateTime& start, const RawDateTime& end);

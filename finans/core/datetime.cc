@@ -13,6 +13,15 @@ RawDateTime RawDateTime::FromLocalTime(const DateTime& dt) {
   return RawDateTime(mktime(&tt));
 }
 
+RawDateTime RawDateTime::FromGmt(const DateTime& dt) {
+#ifdef FINANS_WINDOWS
+  struct tm tt = dt.time();
+  return RawDateTime(_mkgmtime(&tt));
+#else
+#error "undefined platform"
+#endif
+}
+
 RawDateTime RawDateTime::CurrentTime() {
   return RawDateTime(time(NULL));
 }
