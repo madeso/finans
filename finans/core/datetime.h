@@ -65,4 +65,9 @@ private:
   struct tm time_;
 };
 
+// unix date time format, 64 bit
+// todo: test 2038 problem
+uint64_t DateTimeToInt64(const RawDateTime& dt);
+RawDateTime Int64ToDateTime(uint64_t i);
+
 #endif  // CORE_PROTO_H_

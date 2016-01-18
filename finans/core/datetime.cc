@@ -145,3 +145,16 @@ of the other members are interpreted even if out of their valid ranges(see struc
 tm_wday	int	days since Sunday	0 - 6
 tm_yday	int	days since January 1	0 - 365
 */
+
+uint64_t DateTimeToInt64(const RawDateTime& dt) {
+  const auto diff = RawDateTime::Difference(RawDateTime::FromGmt(DateTime(1970, 0 ,1, 0, 0, 0)), dt);
+  return static_cast<uint64_t>(diff);
+}
+
+RawDateTime Int64ToDateTime(uint64_t i) {
+  const uint64_t minutes = (i - (i % 60)) / 60;
+  const int actual_seconds = i % 60;
+  const uint64_t hours = (minutes - (minutes % 60)) / 60;
+  const int acutal_minutes = minutes % 60;
+  return RawDateTime::FromGmt(DateTime(1970, 0, 1, hours, acutal_minutes, actual_seconds));
+}
