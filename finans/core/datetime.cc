@@ -14,6 +14,7 @@ RawDateTime RawDateTime::FromLocalTime(const DateTime& dt) {
 }
 
 RawDateTime RawDateTime::FromGmt(const DateTime& dt) {
+  // http://stackoverflow.com/questions/283166/easy-way-to-convert-a-struct-tm-expressed-in-utc-to-time-t-type
 #ifdef FINANS_WINDOWS
   struct tm tt = dt.time();
   return RawDateTime(_mkgmtime(&tt));
