@@ -119,7 +119,7 @@ std::string DateTime::ToString(const std::string& format) const {
   const size_t base_size = 100;
   for (int i = 1; i < 100; ++i) {
     const size_t string_length = base_size * i;
-    ret.reserve(string_length);
+    ret.resize(string_length);
     const auto characters_written = strftime(&ret[0], string_length, format.c_str(), &time_);
     if (characters_written != 0) return &ret[0];
   }
@@ -128,7 +128,7 @@ std::string DateTime::ToString(const std::string& format) const {
 }
 
 std::string DateTime::DebugString() const {
-  return asctime(&time_);
+  return ToString("%Y-%m-%d %H:%M:%S");
 }
 
 /*

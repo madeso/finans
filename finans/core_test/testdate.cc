@@ -7,7 +7,8 @@
 #define GTEST(x) GTEST_TEST(datetime, x)
 
 GTEST(TestBasic) {
-  DateTime dt(2001, 1, 1, 11, 12, 13);
+  DateTime dt(2001, 0, 1, 11, 12, 13);
+  EXPECT_EQ(dt.DebugString(), "2001-01-01 11:12:13");
   auto r = RawDateTime::FromLocalTime(dt);
   EXPECT_EQ(dt.DebugString(), r.ToLocalTime().DebugString());
   EXPECT_EQ(dt.DebugString(), Int64ToDateTime(DateTimeToInt64(r)).ToLocalTime().DebugString());
