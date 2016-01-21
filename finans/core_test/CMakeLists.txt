@@ -17,4 +17,4 @@ add_test(AllTestsInFinansCoreTest FinansCoreTest)
 
 add_custom_command(TARGET FinansCoreTest
                    POST_BUILD
-                   COMMAND ctest -C $<CONFIGURATION> --output-on-failure)
+                   COMMAND FinansCoreTest)
