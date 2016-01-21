@@ -11,5 +11,6 @@ else()
 endif()
 
 add_subdirectory(core)
+add_subdirectory(core_test)
 add_subdirectory(cmd)
 # add_subdirectory(gui)
