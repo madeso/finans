@@ -16,50 +16,50 @@ Month IntToMonth(int m) {
 
 //////////////////////////////////////////////////////////////////////////
 
-RawDateTime::RawDateTime(time_t time) : time_(time) {
+TimetWrapper::TimetWrapper(time_t time) : time_(time) {
 }
 
-RawDateTime RawDateTime::FromLocalTime(const DateTime& dt) {
+TimetWrapper TimetWrapper::FromLocalTime(const StructTmWrapper& dt) {
   struct tm tt = dt.time();
-  return RawDateTime(mktime(&tt));
+  return TimetWrapper(mktime(&tt));
 }
 
-RawDateTime RawDateTime::FromGmt(const DateTime& dt) {
+TimetWrapper TimetWrapper::FromGmt(const StructTmWrapper& dt) {
   // http://stackoverflow.com/questions/283166/easy-way-to-convert-a-struct-tm-expressed-in-utc-to-time-t-type
 #ifdef FINANS_WINDOWS
   struct tm tt = dt.time();
-  return RawDateTime(_mkgmtime(&tt));
+  return TimetWrapper(_mkgmtime(&tt));
 #else
 #error "undefined platform"
 #endif
 }
 
-RawDateTime RawDateTime::CurrentTime() {
-  return RawDateTime(time(NULL));
+TimetWrapper TimetWrapper::CurrentTime() {
+  return TimetWrapper(time(NULL));
 }
 
-double RawDateTime::Difference(const RawDateTime& start, const RawDateTime& end) {
+double TimetWrapper::Difference(const TimetWrapper& start, const TimetWrapper& end) {
   return difftime(end.time_, start.time_);
 }
 
-DateTime RawDateTime::ToLocalTime() const {
-  return DateTime(*localtime(&time_));
+StructTmWrapper TimetWrapper::ToLocalTime() const {
+  return StructTmWrapper(*localtime(&time_));
 }
 
-DateTime RawDateTime::ToGmt() const {
-  return DateTime(*gmtime(&time_));
+StructTmWrapper TimetWrapper::ToGmt() const {
+  return StructTmWrapper(*gmtime(&time_));
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-DateTime::DateTime(struct tm time) : time_(time) {
+StructTmWrapper::StructTmWrapper(struct tm time) : time_(time) {
 }
 
-struct tm DateTime::time() const {
+struct tm StructTmWrapper::time() const {
   return time_;
 }
 
-DateTime::DateTime(int year, Month month, int day) {
+StructTmWrapper::StructTmWrapper(int year, Month month, int day) {
   memset(&time_, 0, sizeof(struct tm));
   set_year(year);
   set_month(month);
@@ -69,7 +69,7 @@ DateTime::DateTime(int year, Month month, int day) {
   set_seconds(0);
 }
 
-DateTime::DateTime(int year, Month month, int day, int hour, int minute, int second, bool dst) {
+StructTmWrapper::StructTmWrapper(int year, Month month, int day, int hour, int minute, int second, bool dst) {
   memset(&time_, 0, sizeof(struct tm));
   set_year(year);
   set_month(month);
@@ -80,19 +80,19 @@ DateTime::DateTime(int year, Month month, int day, int hour, int minute, int sec
   set_dst(dst ? DstInfo::IN_EFFECT : DstInfo::NOT_IN_EFFECT);
 }
 
-void DateTime::set_seconds(int seconds) { time_.tm_sec = seconds; }
+void StructTmWrapper::set_seconds(int seconds) { time_.tm_sec = seconds; }
 
-void DateTime::set_minutes(int minutes) { time_.tm_min = minutes; }
+void StructTmWrapper::set_minutes(int minutes) { time_.tm_min = minutes; }
 
-void DateTime::set_hour(int hour) { time_.tm_hour = hour; }
+void StructTmWrapper::set_hour(int hour) { time_.tm_hour = hour; }
 
-void DateTime::set_day_of_moth(int day_of_moth) { time_.tm_mday = day_of_moth; }
+void StructTmWrapper::set_day_of_moth(int day_of_moth) { time_.tm_mday = day_of_moth; }
 
-void DateTime::set_month(Month month) { time_.tm_mon = MonthToInt(month); }
+void StructTmWrapper::set_month(Month month) { time_.tm_mon = MonthToInt(month); }
 
-void DateTime::set_year(int year) { time_.tm_year = year - 1900; }
+void StructTmWrapper::set_year(int year) { time_.tm_year = year - 1900; }
 
-void DateTime::set_dst(DstInfo dst) {
+void StructTmWrapper::set_dst(DstInfo dst) {
   switch (dst) {
   case DstInfo::IN_EFFECT:
     time_.tm_isdst = 1;
@@ -107,25 +107,25 @@ void DateTime::set_dst(DstInfo dst) {
   assert(0 && "unhandled dst value switch");
 }
 
-int DateTime::seconds() const { return time_.tm_sec; }
+int StructTmWrapper::seconds() const { return time_.tm_sec; }
 
-int DateTime::minutes() const { return time_.tm_min; }
+int StructTmWrapper::minutes() const { return time_.tm_min; }
 
-int DateTime::hour() const { return time_.tm_hour; }
+int StructTmWrapper::hour() const { return time_.tm_hour; }
 
-int DateTime::day_of_moth() const { return time_.tm_mday; }
+int StructTmWrapper::day_of_moth() const { return time_.tm_mday; }
 
-Month DateTime::month() const { return IntToMonth(time_.tm_mon); }
+Month StructTmWrapper::month() const { return IntToMonth(time_.tm_mon); }
 
-int DateTime::year() const { return time_.tm_year + 1900; }
+int StructTmWrapper::year() const { return time_.tm_year + 1900; }
 
-DstInfo DateTime::dst() const {
+DstInfo StructTmWrapper::dst() const {
   if (time_.tm_isdst == 0) return DstInfo::NOT_IN_EFFECT;
   if (time_.tm_isdst > 0) return DstInfo::IN_EFFECT;
   else return DstInfo::INFO_UNAVAILABLE;
 }
 
-std::string DateTime::ToString(const std::string& format) const {
+std::string StructTmWrapper::ToString(const std::string& format) const {
   std::vector<char> ret;
   const size_t base_size = 100;
   for (int i = 1; i < 100; ++i) {
@@ -138,7 +138,7 @@ std::string DateTime::ToString(const std::string& format) const {
   return "";
 }
 
-std::string DateTime::DebugString() const {
+std::string StructTmWrapper::DebugString() const {
   return ToString("%Y-%m-%d %H:%M:%S");
 }
 
@@ -158,15 +158,15 @@ tm_wday	int	days since Sunday	0 - 6
 tm_yday	int	days since January 1	0 - 365
 */
 
-uint64_t DateTimeToInt64(const RawDateTime& dt) {
-  const auto diff = RawDateTime::Difference(RawDateTime::FromGmt(DateTime(1970, Month::JANUARY ,1, 0, 0, 0)), dt);
+uint64_t DateTimeToInt64(const TimetWrapper& dt) {
+  const auto diff = TimetWrapper::Difference(TimetWrapper::FromGmt(StructTmWrapper(1970, Month::JANUARY ,1, 0, 0, 0)), dt);
   return static_cast<uint64_t>(diff);
 }
 
-RawDateTime Int64ToDateTime(uint64_t i) {
+TimetWrapper Int64ToDateTime(uint64_t i) {
   const uint64_t minutes = (i - (i % 60)) / 60;
   const int actual_seconds = i % 60;
   const uint64_t hours = (minutes - (minutes % 60)) / 60;
   const int acutal_minutes = minutes % 60;
-  return RawDateTime::FromGmt(DateTime(1970, Month::JANUARY, 1, hours, acutal_minutes, actual_seconds));
+  return TimetWrapper::FromGmt(StructTmWrapper(1970, Month::JANUARY, 1, hours, acutal_minutes, actual_seconds));
 }

@@ -7,26 +7,26 @@
 #include <string>
 #include <cstdint>
 
-class RawDateTime;
-class DateTime;
+class TimetWrapper;
+class StructTmWrapper;
 
 enum class Month {
   JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER
 };
 
-class RawDateTime {
+class TimetWrapper {
 protected:
-  friend class DateTime;
-  explicit RawDateTime(time_t time);
+  friend class StructTmWrapper;
+  explicit TimetWrapper(time_t time);
 public:
-  static RawDateTime FromLocalTime(const DateTime& dt);
-  static RawDateTime FromGmt(const DateTime& dt);
-  static RawDateTime CurrentTime();
+  static TimetWrapper FromLocalTime(const StructTmWrapper& dt);
+  static TimetWrapper FromGmt(const StructTmWrapper& dt);
+  static TimetWrapper CurrentTime();
 
-  static double Difference(const RawDateTime& start, const RawDateTime& end);
+  static double Difference(const TimetWrapper& start, const TimetWrapper& end);
 
-  DateTime ToLocalTime() const;
-  DateTime ToGmt() const;
+  StructTmWrapper ToLocalTime() const;
+  StructTmWrapper ToGmt() const;
 private:
   time_t time_;
 };
@@ -35,15 +35,15 @@ enum class DstInfo {
   IN_EFFECT, NOT_IN_EFFECT, INFO_UNAVAILABLE
 };
 
-class DateTime {
+class StructTmWrapper {
 protected:
-  friend class RawDateTime;
-  explicit DateTime(struct tm time);
+  friend class TimetWrapper;
+  explicit StructTmWrapper(struct tm time);
   struct tm time() const;
 
 public:
-  DateTime(int year, Month month, int day);
-  DateTime(int year, Month month, int day, int hour, int minute, int second, bool dst=false);
+  StructTmWrapper(int year, Month month, int day);
+  StructTmWrapper(int year, Month month, int day, int hour, int minute, int second, bool dst=false);
 
   void set_seconds(int seconds);
   void set_minutes(int minutes);
@@ -71,7 +71,7 @@ private:
 
 // unix date time format, 64 bit
 // todo: test 2038 problem
-uint64_t DateTimeToInt64(const RawDateTime& dt);
-RawDateTime Int64ToDateTime(uint64_t i);
+uint64_t DateTimeToInt64(const TimetWrapper& dt);
+TimetWrapper Int64ToDateTime(uint64_t i);
 
 #endif  // CORE_PROTO_H_
