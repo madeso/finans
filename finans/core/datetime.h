@@ -74,4 +74,55 @@ private:
 uint64_t DateTimeToInt64(const TimetWrapper& dt);
 TimetWrapper Int64ToDateTime(uint64_t i);
 
+enum class TimeZone {
+  GMT, LOCAL
+};
+
+// public interface
+// util class to make stuff nice to use
+class DateTime {
+public:
+  static DateTime FromDate(int year, Month month, int day, TimeZone timezone = TimeZone::LOCAL);
+  static DateTime FromDateTime(int year, Month month, int day, int hour, int minute, int second, TimeZone timezone = TimeZone::LOCAL);
+  static DateTime CurrentTime(TimeZone timezone = TimeZone::LOCAL);
+
+public:
+  std::string ToString(const std::string& format) const;
+  std::string DebugString() const;
+
+public:
+  void set_seconds(int seconds);
+  void set_minutes(int minutes);
+  void set_hour(int hour);
+  void set_day_of_moth(int day_of_moth);
+  void set_month(Month month);
+  void set_year(int year);
+  void set_dst(DstInfo dst);
+
+  int seconds() const;
+  int minutes() const;
+  int hour() const;
+  int day_of_moth() const;
+  Month month() const;
+  int year() const;
+  DstInfo dst() const;
+
+public:
+  const TimeZone timezone() const;
+  const TimetWrapper time() const;
+
+private:
+  DateTime();
+  DateTime(TimeZone timezone, const StructTmWrapper& time);
+  DateTime(TimeZone timezone, const TimetWrapper& time);
+
+private:
+  StructTmWrapper AsStruct() const;
+  void UpdateTime(const StructTmWrapper& s);
+
+private:
+  TimeZone timezone_;
+  TimetWrapper time_;
+};
+
 #endif  // CORE_PROTO_H_

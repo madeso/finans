@@ -170,3 +170,140 @@ TimetWrapper Int64ToDateTime(uint64_t i) {
   const int acutal_minutes = minutes % 60;
   return TimetWrapper::FromGmt(StructTmWrapper(1970, Month::JANUARY, 1, hours, acutal_minutes, actual_seconds));
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+DateTime DateTime::FromDate(int year, Month month, int day, TimeZone timezone) {
+  return DateTime(timezone, StructTmWrapper(year, month, day));
+}
+
+DateTime DateTime::FromDateTime(int year, Month month, int day, int hour, int minute, int second, TimeZone timezone) {
+  return DateTime(timezone, StructTmWrapper(year, month, day, hour, minute, second));
+}
+
+DateTime DateTime::CurrentTime(TimeZone timezone) {
+  return DateTime(timezone, TimetWrapper::CurrentTime());
+}
+
+std::string DateTime::ToString(const std::string& format) const {
+  return AsStruct().ToString(format);
+}
+
+std::string DateTime::DebugString() const {
+  return AsStruct().DebugString();
+}
+
+void DateTime::set_seconds(int seconds) {
+  auto s = AsStruct();
+  s.set_seconds(seconds);
+  UpdateTime(s);
+}
+
+void DateTime::set_minutes(int minutes) {
+  auto s = AsStruct();
+  s.set_minutes(minutes);
+  UpdateTime(s);
+}
+
+void DateTime::set_hour(int hour) {
+  auto s = AsStruct();
+  s.set_hour(hour);
+  UpdateTime(s);
+}
+
+void DateTime::set_day_of_moth(int day_of_moth) {
+  auto s = AsStruct();
+  s.set_day_of_moth(day_of_moth);
+  UpdateTime(s);
+}
+
+void DateTime::set_month(Month month) {
+  auto s = AsStruct();
+  s.set_month(month);
+  UpdateTime(s);
+}
+
+void DateTime::set_year(int year) {
+  auto s = AsStruct();
+  s.set_year(year);
+  UpdateTime(s);
+}
+
+void DateTime::set_dst(DstInfo dst) {
+  auto s = AsStruct();
+  s.set_dst(dst);
+  UpdateTime(s);
+}
+
+
+int DateTime::seconds() const {
+  return AsStruct().seconds();
+}
+
+int DateTime::minutes() const {
+  return AsStruct().minutes();
+}
+
+int DateTime::hour() const {
+  return AsStruct().hour();
+}
+
+int DateTime::day_of_moth() const {
+  return AsStruct().day_of_moth();
+}
+
+Month DateTime::month() const {
+  return AsStruct().month();
+}
+
+int DateTime::year() const {
+  return AsStruct().year();
+}
+
+DstInfo DateTime::dst() const {
+  return AsStruct().dst();
+}
+
+const TimeZone DateTime::timezone() const {
+  return timezone_;
+}
+
+const TimetWrapper DateTime::time() const {
+  return time_;
+}
+
+TimetWrapper ToTimetWrapper(const StructTmWrapper& s, TimeZone timezone) {
+  switch (timezone)
+  {
+  case TimeZone::GMT:
+    return TimetWrapper::FromGmt(s);
+  case TimeZone::LOCAL:
+    return TimetWrapper::FromLocalTime(s);
+  default:
+    assert(false && "Invalid timezone");
+    return TimetWrapper::FromGmt(s);
+  }
+}
+
+DateTime::DateTime(TimeZone timezone, const StructTmWrapper& time) : timezone_(timezone), time_(ToTimetWrapper(time, timezone)) {
+}
+
+DateTime::DateTime(TimeZone timezone, const TimetWrapper& time) : timezone_(timezone), time_(time) {
+}
+
+StructTmWrapper DateTime::AsStruct() const {
+  switch (timezone_)
+  {
+  case TimeZone::GMT:
+    return time_.ToGmt();
+  case TimeZone::LOCAL:
+    return time_.ToLocalTime();
+  default:
+    assert(false && "Invalid timezone");
+    return time_.ToGmt();
+  }
+}
+
+void DateTime::UpdateTime(const StructTmWrapper& s) {
+  time_ = ToTimetWrapper(s, timezone_);
+}
