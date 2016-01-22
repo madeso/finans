@@ -5,6 +5,17 @@
 #include <vector>
 #include <cassert>
 
+int MonthToInt(Month month) {
+  return static_cast<int>(month);
+}
+
+Month IntToMonth(int m) {
+  assert(m >= MonthToInt(Month::JANUARY) && m <= MonthToInt(Month::DECEMBER));
+  return static_cast<Month>(m);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 RawDateTime::RawDateTime(time_t time) : time_(time) {
 }
 
@@ -48,7 +59,7 @@ struct tm DateTime::time() const {
   return time_;
 }
 
-DateTime::DateTime(int year, int month, int day) {
+DateTime::DateTime(int year, Month month, int day) {
   memset(&time_, 0, sizeof(struct tm));
   set_year(year);
   set_month(month);
@@ -58,7 +69,7 @@ DateTime::DateTime(int year, int month, int day) {
   set_seconds(0);
 }
 
-DateTime::DateTime(int year, int month, int day, int hour, int minute, int second, bool dst) {
+DateTime::DateTime(int year, Month month, int day, int hour, int minute, int second, bool dst) {
   memset(&time_, 0, sizeof(struct tm));
   set_year(year);
   set_month(month);
@@ -77,7 +88,7 @@ void DateTime::set_hour(int hour) { time_.tm_hour = hour; }
 
 void DateTime::set_day_of_moth(int day_of_moth) { time_.tm_mday = day_of_moth; }
 
-void DateTime::set_month(int month) { time_.tm_mon = month; }
+void DateTime::set_month(Month month) { time_.tm_mon = MonthToInt(month); }
 
 void DateTime::set_year(int year) { time_.tm_year = year - 1900; }
 
@@ -104,7 +115,7 @@ int DateTime::hour() const { return time_.tm_hour; }
 
 int DateTime::day_of_moth() const { return time_.tm_mday; }
 
-int DateTime::month() const { return time_.tm_mon; }
+Month DateTime::month() const { return IntToMonth(time_.tm_mon); }
 
 int DateTime::year() const { return time_.tm_year + 1900; }
 
@@ -148,7 +159,7 @@ tm_yday	int	days since January 1	0 - 365
 */
 
 uint64_t DateTimeToInt64(const RawDateTime& dt) {
-  const auto diff = RawDateTime::Difference(RawDateTime::FromGmt(DateTime(1970, 0 ,1, 0, 0, 0)), dt);
+  const auto diff = RawDateTime::Difference(RawDateTime::FromGmt(DateTime(1970, Month::JANUARY ,1, 0, 0, 0)), dt);
   return static_cast<uint64_t>(diff);
 }
 
@@ -157,5 +168,5 @@ RawDateTime Int64ToDateTime(uint64_t i) {
   const int actual_seconds = i % 60;
   const uint64_t hours = (minutes - (minutes % 60)) / 60;
   const int acutal_minutes = minutes % 60;
-  return RawDateTime::FromGmt(DateTime(1970, 0, 1, hours, acutal_minutes, actual_seconds));
+  return RawDateTime::FromGmt(DateTime(1970, Month::JANUARY, 1, hours, acutal_minutes, actual_seconds));
 }

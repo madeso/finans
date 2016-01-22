@@ -10,6 +10,10 @@
 class RawDateTime;
 class DateTime;
 
+enum class Month {
+  JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER
+};
+
 class RawDateTime {
 protected:
   friend class DateTime;
@@ -38,14 +42,14 @@ protected:
   struct tm time() const;
 
 public:
-  DateTime(int year, int month, int day);
-  DateTime(int year, int month, int day, int hour, int minute, int second, bool dst=false);
+  DateTime(int year, Month month, int day);
+  DateTime(int year, Month month, int day, int hour, int minute, int second, bool dst=false);
 
   void set_seconds(int seconds);
   void set_minutes(int minutes);
   void set_hour(int hour);
   void set_day_of_moth(int day_of_moth);
-  void set_month(int month);
+  void set_month(Month month);
   void set_year(int year);
   void set_dst(DstInfo dst);
 
@@ -53,7 +57,7 @@ public:
   int minutes() const;
   int hour() const;
   int day_of_moth() const;
-  int month() const;
+  Month month() const;
   int year() const;
   DstInfo dst() const;
 
