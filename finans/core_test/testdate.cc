@@ -9,7 +9,17 @@
 GTEST(TestBasic) {
   DateTime dt(2001, 0, 1, 11, 12, 13);
   EXPECT_EQ(dt.DebugString(), "2001-01-01 11:12:13");
+}
+
+GTEST(TestLocalTime) {
+  DateTime dt(2001, 0, 1, 11, 12, 13);
   auto r = RawDateTime::FromLocalTime(dt);
   EXPECT_EQ(dt.DebugString(), r.ToLocalTime().DebugString());
+}
+
+
+GTEST(TestIntParsing) {
+  DateTime dt(2001, 0, 1, 11, 12, 13);
+  auto r = RawDateTime::FromLocalTime(dt);
   EXPECT_EQ(dt.DebugString(), Int64ToDateTime(DateTimeToInt64(r)).ToLocalTime().DebugString());
 }
