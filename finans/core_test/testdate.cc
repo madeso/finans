@@ -23,3 +23,21 @@ GTEST(TestIntParsing) {
   auto r = TimetWrapper::FromLocalTime(dt);
   EXPECT_EQ(dt.DebugString(), Int64ToDateTime(DateTimeToInt64(r)).ToLocalTime().DebugString());
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+GTEST(TestConstructorGmt) {
+  const auto dt = DateTime::FromDate(2010, Month::FEBRUARY, 2, TimeZone::GMT);
+  EXPECT_EQ(2010, dt.year());
+  EXPECT_EQ(Month::FEBRUARY, dt.month());
+  EXPECT_EQ(2, dt.day_of_moth());
+  EXPECT_EQ(12, dt.hour());
+}
+
+GTEST(TestConstructorLocal) {
+  const auto dt = DateTime::FromDate(2010, Month::FEBRUARY, 2, TimeZone::LOCAL);
+  EXPECT_EQ(2010, dt.year());
+  EXPECT_EQ(Month::FEBRUARY, dt.month());
+  EXPECT_EQ(2, dt.day_of_moth());
+  EXPECT_EQ(12, dt.hour());
+}
