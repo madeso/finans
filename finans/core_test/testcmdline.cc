@@ -102,7 +102,7 @@ GTEST(TestStdVector) {
   std::vector<std::string> strings;
   const bool ok = argparse::Parser::ParseComplete ==
     argparse::Parser("description")
-    .add<std::vector<std::string>, std::string>("-strings", strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar("string"), argparse::PushBackVector<std::string>) // todo: is this beautifiable?
+    ("-strings", strings, "string")
     .parseArgs(argparse::Arguments("app.exe", {"-strings", "cat", "dog", "fish"}), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_THAT(strings, ElementsAre("cat", "dog", "fish"));
