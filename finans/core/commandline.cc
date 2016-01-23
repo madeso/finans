@@ -49,25 +49,25 @@ namespace argparse {
 
 
   Count::Count(size_t c)
-    : mCount(c)
-    , mType(Const)
+    : count_(c)
+    , type_(Const)
   {
   }
 
   Count::Count(Count::Type t)
-    : mCount(0)
-    , mType(t)
+    : count_(0)
+    , type_(t)
   {
     assert(t != Const);
   }
 
   Count::Type Count::type() const
   {
-    return mType;
+    return type_;
   }
   size_t Count::count() const
   {
-    return mCount;
+    return count_;
   }
 
 
@@ -81,6 +81,16 @@ namespace argparse {
   {
   }
 
+  FunctionArgument::FunctionArgument(const ArgumentCallback& func)
+    : function_(func)
+  {
+  }
+
+  void FunctionArgument::parse(Running& r, Arguments& args, const std::string& argname)
+  {
+    function_(r, args, argname);
+  }
+
   bool IsOptional(const std::string& arg)
   {
     if (arg.empty()) return false; // todo: assert this?
@@ -88,40 +98,40 @@ namespace argparse {
   }
 
   Extra::Extra()
-    : mCount(1)
+    : count_(1)
   {
   }
 
 
   Extra& Extra::help(const std::string& h)
   {
-    mHelp = h;
+    help_ = h;
     return *this;
   }
   const std::string& Extra::help() const
   {
-    return mHelp;
+    return help_;
   }
 
   Extra& Extra::count(const Count c)
   {
-    mCount = c;
+    count_ = c;
     return *this;
   }
   const Count& Extra::count() const
   {
-    return mCount;
+    return count_;
   }
 
   Extra& Extra::metavar(const std::string& metavar)
   {
-    mMetavar = metavar;
+    metaVar_ = metavar;
     return *this;
   }
 
   const std::string& Extra::metavar() const
   {
-    return mMetavar;
+    return metaVar_;
   }
 
   std::string Upper(const std::string& s)
@@ -132,20 +142,20 @@ namespace argparse {
   }
 
   Help::Help(const std::string& aname, const Extra& e)
-    : name(aname)
-    , help(e.help())
-    , metavar(e.metavar())
-    , count(e.count().type())
-    , countcount(e.count().count())
+    : name_(aname)
+    , help_(e.help())
+    , metavar_(e.metavar())
+    , count_(e.count().type())
+    , countcount_(e.count().count())
 
   {
   }
 
   const std::string Help::usage() const
   {
-    if (IsOptional(name))
+    if (IsOptional(name_))
     {
-      return "[" + name + " " + metavarrep() + "]";
+      return "[" + name_ + " " + metavarrep() + "]";
     }
     else
     {
@@ -155,7 +165,7 @@ namespace argparse {
 
   const std::string Help::metavarrep() const
   {
-    switch (count)
+    switch (count_)
     {
     case Count::None:
       return "";
@@ -169,7 +179,7 @@ namespace argparse {
     {
       std::ostringstream ss;
       ss << "[";
-      for (size_t i = 0; i < countcount; ++i)
+      for (size_t i = 0; i < countcount_; ++i)
       {
         if (i != 0)
         {
@@ -188,28 +198,28 @@ namespace argparse {
 
   const std::string Help::metavarname() const
   {
-    if (metavar.empty() == false)
+    if (metavar_.empty() == false)
     {
-      return metavar;
+      return metavar_;
     }
     else
     {
-      if (IsOptional(name))
+      if (IsOptional(name_))
       {
-        return Upper(name.substr(1));
+        return Upper(name_.substr(1));
       }
       else
       {
-        return name;
+        return name_;
       }
     }
   }
 
   const std::string Help::helpCommand() const
   {
-    if (IsOptional(name))
+    if (IsOptional(name_))
     {
-      return name + " " + metavarrep();
+      return name_ + " " + metavarrep();
     }
     else
     {
@@ -219,7 +229,7 @@ namespace argparse {
 
   const std::string& Help::helpDescription() const
   {
-    return help;
+    return help_;
   }
 
   CallHelp::CallHelp(Parser* on)
@@ -234,9 +244,9 @@ namespace argparse {
   }
 
   Parser::Parser(const std::string& d, const std::string aappname)
-    : positionalIndex(0)
-    , description(d)
-    , appname(aappname)
+    : positionalIndex_(0)
+    , description_(d)
+    , appname_(aappname)
   {
     addFunction("-h", CallHelp(this), Extra().count(Count::None).help("show this help message and exit"));
   }
@@ -271,8 +281,8 @@ namespace argparse {
         {
           // optional
           const std::string arg = args.get();
-          Optionals::const_iterator r = optionals.find(arg);
-          if (r == optionals.end())
+          Optionals::const_iterator r = optionals_.find(arg);
+          if (r == optionals_.end())
           {
             throw ParserError("Unknown optional argument: " + arg); // todo: implement partial matching of arguments?
           }
@@ -280,17 +290,17 @@ namespace argparse {
         }
         else
         {
-          if (positionalIndex >= positionals.size())
+          if (positionalIndex_ >= positionals_.size())
           {
             throw ParserError("All positional arguments have been consumed: " + args[0]);
           }
-          ArgumentPtr p = positionals[positionalIndex];
-          ++positionalIndex;
+          ArgumentPtr p = positionals_[positionalIndex_];
+          ++positionalIndex_;
           p->parse(running, args, "POSITIONAL"); // todo: give better name or something
         }
       }
 
-      if (positionalIndex != positionals.size())
+      if (positionalIndex_ != positionals_.size())
       {
         throw ParserError("too few arguments"); // todo: list a few missing arguments...
       }
@@ -308,15 +318,15 @@ namespace argparse {
   void Parser::writeHelp(Running& r) const
   {
     writeUsage(r);
-    r.o << std::endl << description << std::endl << std::endl;
+    r.o << std::endl << description_ << std::endl << std::endl;
 
     const std::string sep = "\t";
     const std::string ins = "  ";
 
-    if (helpPositional.empty() == false)
+    if (helpPositional_.empty() == false)
     {
       r.o << "positional arguments: " << std::endl;
-      for (const Help& positional : helpPositional)
+      for (const Help& positional : helpPositional_)
       {
         r.o << ins << positional.helpCommand() << sep << positional.helpDescription() << std::endl;
       }
@@ -324,10 +334,10 @@ namespace argparse {
       r.o << std::endl;
     }
 
-    if (helpOptional.empty() == false)
+    if (helpOptional_.empty() == false)
     {
       r.o << "optional arguments: " << std::endl;
-      for (const Help& optional : helpOptional)
+      for (const Help& optional : helpOptional_)
       {
         r.o << ins << optional.helpCommand() << sep << optional.helpDescription() << std::endl;
       }
@@ -339,12 +349,12 @@ namespace argparse {
   void Parser::writeUsage(Running& r) const
   {
     r.o << "usage: " << r.app;
-    for (const Help& optional : helpOptional)
+    for (const Help& optional : helpOptional_)
     {
       r.o << " " << optional.usage();
     }
 
-    for (const Help& positional : helpPositional)
+    for (const Help& positional : helpPositional_)
     {
       r.o << " " << positional.usage();
     }
@@ -356,14 +366,14 @@ namespace argparse {
   {
     if (IsOptional(name))
     {
-      optionals.insert(Optionals::value_type(name, arg));
-      helpOptional.push_back(Help(name, extra));
+      optionals_.insert(Optionals::value_type(name, arg));
+      helpOptional_.push_back(Help(name, extra));
       return *this;
     }
     else
     {
-      positionals.push_back(arg);
-      helpPositional.push_back(Help(name, extra));
+      positionals_.push_back(arg);
+      helpPositional_.push_back(Help(name, extra));
       return *this;
     }
   }

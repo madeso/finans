@@ -81,14 +81,13 @@ namespace argparse
     };
 
     Count(size_t c);
-
     Count(Type t);
 
     Type type() const;
     size_t count() const;
   private:
-    size_t mCount;
-    Type mType;
+    size_t count_;
+    Type type_;
   };
 
   /// basic class for passing along variables that only exist when parsing
@@ -117,17 +116,10 @@ namespace argparse
   class FunctionArgument : public Argument
   {
   public:
-    FunctionArgument(const ArgumentCallback& func)
-      : function(func)
-    {
-    }
-
-    void parse(Running& r, Arguments& args, const std::string& argname)
-    {
-      function(r, args, argname);
-    }
+    FunctionArgument(const ArgumentCallback& func);
+    void parse(Running& r, Arguments& args, const std::string& argname);
   private:
-    ArgumentCallback function;
+    ArgumentCallback function_;
   };
 
   template <typename T, typename V>
@@ -135,47 +127,47 @@ namespace argparse
   {
   public:
     ArgumentT(T& t, const Count& co, CombinerFunction(T, V) com, ConverterFunction(V) c)
-      : target(t)
-      , count(co)
-      , combine(com)
-      , converter(c)
+      : target_(t)
+      , count_(co)
+      , combiner_(com)
+      , converter_(c)
     {
     }
 
     virtual void parse(Running&, Arguments& args, const std::string& argname)
     {
-      switch (count.type())
+      switch (count_.type())
       {
       case Count::Const:
-        for (size_t i = 0; i < count.count(); ++i)
+        for (size_t i = 0; i < count_.count(); ++i)
         {
           std::stringstream ss;
           ss << "argument " << argname << ": expected ";
-          if (count.count() == 1)
+          if (count_.count() == 1)
           {
             ss << "one argument";
           }
           else
           {
-            ss << count.count() << " argument(s), " << i << " already given";
+            ss << count_.count() << " argument(s), " << i << " already given";
           }
-          combine(target, converter(args.get(ss.str())));
+          combiner_(target_, converter_(args.get(ss.str())));
 
           // abort on optional?
         }
         return;
       case Count::MoreThanOne:
-        combine(target, converter(args.get("argument " + argname + ": expected atleast one argument")));
+        combiner_(target_, converter_(args.get("argument " + argname + ": expected atleast one argument")));
       case Count::ZeroOrMore:
         while (args.empty() == false && IsOptional(args[0]) == false)
         {
-          combine(target, converter(args.get("internal error")));
+          combiner_(target_, converter_(args.get("internal error")));
         }
         return;
       case Count::Optional:
         if (args.empty()) return;
         if (IsOptional(args[0])) return;
-        combine(target, converter(args.get("internal error")));
+        combiner_(target_, converter_(args.get("internal error")));
         return;
       case Count::None:
         return;
@@ -185,10 +177,10 @@ namespace argparse
       }
     }
   private:
-    T& target;
-    Count count;
-    CombinerFunction(T, V) combine;
-    ConverterFunction(V) converter;
+    T& target_;
+    Count count_;
+    CombinerFunction(T, V) combiner_;
+    ConverterFunction(V) converter_;
   };
 
   /// internal function.
@@ -213,9 +205,9 @@ namespace argparse
     Extra& metavar(const std::string& metavar);
     const std::string& metavar() const;
   private:
-    std::string mHelp;
-    Count mCount;
-    std::string mMetavar;
+    std::string help_;
+    Count count_;
+    std::string metaVar_;
   };
 
   std::string Upper(const std::string& s);
@@ -235,11 +227,11 @@ namespace argparse
 
     const std::string& helpDescription() const;
   private:
-    std::string name;
-    std::string help;
-    std::string metavar;
-    Count::Type count;
-    size_t countcount;
+    std::string name_;
+    std::string help_;
+    std::string metavar_;
+    Count::Type count_;
+    size_t countcount_;
   };
 
   template<typename A, typename B>
@@ -310,18 +302,18 @@ namespace argparse
 
     Parser& insert(const std::string& name, ArgumentPtr arg, const Extra& extra);
 
-    std::string description;
-    std::string appname;
+    std::string description_;
+    std::string appname_;
 
     typedef std::map<std::string, ArgumentPtr> Optionals;
-    Optionals optionals;
+    Optionals optionals_;
 
     typedef std::vector<ArgumentPtr> Positionals;
-    Positionals positionals;
-    mutable size_t positionalIndex; // todo: mutable or change parseArgs to nonconst?
+    Positionals positionals_;
+    mutable size_t positionalIndex_; // todo: mutable or change parseArgs to nonconst?
 
-    std::vector<Help> helpOptional;
-    std::vector<Help> helpPositional;
+    std::vector<Help> helpOptional_;
+    std::vector<Help> helpPositional_;
   };
 }
 
