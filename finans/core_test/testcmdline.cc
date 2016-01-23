@@ -3,8 +3,11 @@
 #include "finans/core/commandline.h"
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
-struct CommandlineTest : public ::testing::Test {
+using namespace testing;
+
+struct CommandlineTest : public Test {
   std::ostringstream output;
   std::ostringstream error;
 };
@@ -30,7 +33,7 @@ void main(int argc, char* argv[])
     ("int", i)
     ("-op", op)
     .add<std::vector<std::string>, std::string>("-strings", strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar("string"), argparse::PushBackVector<std::string>) // todo: is this beautifiable?
-                                                                                                                                                                                     //("-enum", &v, Convert<MyEnum>("MyVal", MyEnum::MyVal)("MyVal2", MyEnum::MyVal2) )
+    //("-enum", &v, Convert<MyEnum>("MyVal", MyEnum::MyVal)("MyVal2", MyEnum::MyVal2) )
     .parseArgs(argc, argv);
   if (ok == false) return;
   std::cout << compiler << " " << i << " " << op << std::endl;
@@ -93,4 +96,14 @@ GTEST(TestPositionalValueErr) {
     .parseArgs(argparse::Arguments("app.exe", {}), output, error);
   EXPECT_EQ(false, ok);
   EXPECT_EQ(42, op); // not touched
+}
+
+GTEST(TestStdVector) {
+  std::vector<std::string> strings;
+  const bool ok = argparse::Parser::ParseComplete ==
+    argparse::Parser("description")
+    .add<std::vector<std::string>, std::string>("-strings", strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar("string"), argparse::PushBackVector<std::string>) // todo: is this beautifiable?
+    .parseArgs(argparse::Arguments("app.exe", {"-strings", "cat", "dog", "fish"}), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_THAT(strings, ElementsAre("cat", "dog", "fish"));
 }

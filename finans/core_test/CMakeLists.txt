@@ -13,7 +13,7 @@ add_executable(FinansCoreTest
 	${src}
 )
 
-target_link_libraries(FinansCoreTest FinansCore ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(FinansCoreTest FinansCore ${GTEST_BOTH_LIBRARIES} ${GMOCK_LIBRARY})
 
 add_test(AllTestsInFinansCoreTest FinansCoreTest)
 
