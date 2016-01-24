@@ -118,7 +118,7 @@ GTEST(TestStdVectorInts) {
   EXPECT_THAT(ints, ElementsAre(2, 3, -5, 4));
 }
 
-GTEST(TestnonGreedyVector) {
+GTEST(TestNonGreedyVector) {
   std::vector<std::string> strings;
   const bool ok = argparse::Parser::ParseComplete ==
     argparse::Parser("description")
