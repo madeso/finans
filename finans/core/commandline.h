@@ -277,7 +277,7 @@ namespace argparse
 
     template<typename T>
     Parser& operator()(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
-      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar(metavar), argparse::PushBackVector<std::string>);
+      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     Parser& operator()(const std::string& name, ArgumentCallback func, const Extra& extra = Extra());
