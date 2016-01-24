@@ -13,6 +13,8 @@
 #include <memory>
 #include <cassert>
 
+#include "stringutils.h"
+
 #define ConverterFunction(V) std::function<V (const std::string&)>
 #define CombinerFunction(T,V) std::function<void (T& t, const V&)>
 
@@ -255,6 +257,53 @@ namespace argparse
     void operator()(Running& r, Arguments& args, const std::string& argname);
 
     Parser* parser;
+  };
+
+  template<typename T>
+  class StringConverter {
+  public:
+    StringConverter(const std::string name) : name_(name){
+    }
+
+    StringConverter& operator()(const std::string& s, const T& t) {
+      entries_.push_back(std::make_pair(ToUpper(s), t));
+      exact_.insert(std::make_pair(ToUpper(s), t));
+      return *this;
+    }
+
+    T Convert(const std::string& a) const {
+      
+
+      const auto s = ToUpper(a);
+
+      const auto r = exact_.find(s);
+      if (r != exact_.end()) {
+        return r->second;
+      }
+
+        std::vector<T> res;
+      for (const auto& n : entries_ ) {
+        if (StartsWith(n.first, s)) {
+          res.push_back(n.second);
+        }
+      }
+
+      if (res.empty()) {
+        throw ParserError("Unable to parse " + s + " to a " + name_);
+      }
+      else if (res.size() == 1) {
+        return res[0];
+      }
+      else {
+        // todo: list all values...
+        throw ParserError("Unable to parse " + s + ": Ambiguous value.");
+      }
+    }
+
+  private:
+    std::string name_;
+    std::vector<std::pair<std::string, T>> entries_;
+    std::map<std::string, T> exact_;
   };
 
   /// main entry class that contains all arguments and does all the parsing.
