@@ -133,12 +133,7 @@ enum class Day
   TODAY, YESTERDAY, TOMORROW
 };
 
-template<>
-Day argparse::StandardConverter(const std::string& type)
-{
-  static const auto values = StringConverter<Day>{ "day" }("Today", Day::TODAY)("Tomorrow", Day::TOMORROW)("Yesterday", Day::YESTERDAY);
-  return values.Convert(type);
-}
+ARGPARSE_DEFINE_ENUM(Day, "day", ("Today", Day::TODAY)("Tomorrow", Day::TOMORROW)("Yesterday", Day::YESTERDAY) )
 
 GTEST(TestEnum) {
   Day op = Day::TOMORROW;

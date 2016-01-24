@@ -74,6 +74,14 @@ namespace argparse
     }
   }
 
+#define ARGPARSE_DEFINE_ENUM(TYPE, NAME, VALUES) \
+  template<>\
+  TYPE argparse::StandardConverter(const std::string& type)\
+  {\
+    static const auto values = StringConverter<TYPE>{ NAME } VALUES;\
+    return values.Convert(type);\
+  }
+
   class Count
   {
   public:
