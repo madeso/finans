@@ -127,3 +127,25 @@ GTEST(TestNonGreedyVector) {
   EXPECT_EQ(true, ok);
   EXPECT_THAT(strings, ElementsAre("cat", "dog", "fish"));
 }
+
+enum class Day
+{
+  TODAY, YESTERDAY, TOMORROW
+};
+
+template<>
+Day argparse::StandardConverter(const std::string& type)
+{
+  static const auto values = StringConverter<Day>{ "day" }("Today", Day::TODAY)("Tomorrow", Day::TOMORROW)("Yesterday", Day::YESTERDAY);
+  return values.Convert(type);
+}
+
+GTEST(TestEnum) {
+  Day op = Day::TOMORROW;
+  const bool ok = argparse::Parser::ParseComplete ==
+    argparse::Parser("description")
+    ("op", op)
+    .ParseArgs(argparse::Arguments("app.exe", { "tod" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ(Day::TODAY, op);
+}
