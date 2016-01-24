@@ -31,10 +31,10 @@ namespace argparse
     Arguments(const std::string& name, const std::vector<std::string>& args);
 
     const std::string operator[](int index) const;
-    const bool empty() const;
+    const bool is_empty() const;
     const std::string name() const;
     const size_t size() const;
-    const std::string get(const std::string& error = "no more arguments available");
+    const std::string Get(const std::string& error = "no more arguments available");
   private:
     std::string name_;
     std::vector<std::string> args_;
@@ -108,16 +108,16 @@ namespace argparse
   public:
     virtual ~Argument();
 
-    virtual void parse(Running& r, Arguments& args, const std::string& argname) = 0;
+    virtual void Parse(Running& r, Arguments& args, const std::string& argname) = 0;
   };
 
   typedef std::function<void(Running& r, Arguments&, const std::string&)> ArgumentCallback;
 
-  class FunctionArgument : public Argument
+  class CallbackArgument : public Argument
   {
   public:
-    FunctionArgument(const ArgumentCallback& func);
-    void parse(Running& r, Arguments& args, const std::string& argname);
+    CallbackArgument(const ArgumentCallback& func);
+    void Parse(Running& r, Arguments& args, const std::string& argname);
   private:
     ArgumentCallback function_;
   };
@@ -134,7 +134,7 @@ namespace argparse
     {
     }
 
-    virtual void parse(Running&, Arguments& args, const std::string& argname)
+    virtual void Parse(Running&, Arguments& args, const std::string& argname)
     {
       switch (count_.type())
       {
@@ -151,23 +151,23 @@ namespace argparse
           {
             ss << count_.count() << " argument(s), " << i << " already given";
           }
-          combiner_(target_, converter_(args.get(ss.str())));
+          combiner_(target_, converter_(args.Get(ss.str())));
 
           // abort on optional?
         }
         return;
       case Count::MoreThanOne:
-        combiner_(target_, converter_(args.get("argument " + argname + ": expected atleast one argument")));
+        combiner_(target_, converter_(args.Get("argument " + argname + ": expected atleast one argument")));
       case Count::ZeroOrMore:
-        while (args.empty() == false && IsOptional(args[0]) == false)
+        while (args.is_empty() == false && IsOptional(args[0]) == false)
         {
-          combiner_(target_, converter_(args.get("internal error")));
+          combiner_(target_, converter_(args.Get("internal error")));
         }
         return;
       case Count::Optional:
-        if (args.empty()) return;
+        if (args.is_empty()) return;
         if (IsOptional(args[0])) return;
-        combiner_(target_, converter_(args.get("internal error")));
+        combiner_(target_, converter_(args.Get("internal error")));
         return;
       case Count::None:
         return;
@@ -210,22 +210,22 @@ namespace argparse
     std::string metaVar_;
   };
 
-  std::string Upper(const std::string& s);
+  std::string ToUpper(const std::string& s);
 
   class Help
   {
   public:
-    Help(const std::string& aname, const Extra& e);
+    Help(const std::string& name, const Extra& e);
 
-    const std::string usage() const;
+    const std::string GetUsage() const;
 
-    const std::string metavarrep() const;
+    const std::string GetMetavarReprestentation() const;
 
-    const std::string metavarname() const;
+    const std::string GetMetavarName() const;
 
-    const std::string helpCommand() const;
+    const std::string GetHelpCommand() const;
 
-    const std::string& helpDescription() const;
+    const std::string& help() const;
   private:
     std::string name_;
     std::string help_;
@@ -286,21 +286,21 @@ namespace argparse
     Parser& add(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
     {
       ArgumentPtr arg(new ArgumentT<T, V>(var, extra.count(), combiner, co));
-      return insert(name, arg, extra);
+      return AddArgument(name, arg, extra);
     }
 
-    Parser& addFunction(const std::string& name, ArgumentCallback func, const Extra& extra);
+    Parser& AddArgumentCallback(const std::string& name, ArgumentCallback func, const Extra& extra);
 
-    ParseStatus parseArgs(int argc, char* argv[], std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
-    ParseStatus parseArgs(const Arguments& arguments, std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
+    ParseStatus ParseArgs(int argc, char* argv[], std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
+    ParseStatus ParseArgs(const Arguments& arguments, std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
 
 
-    void writeHelp(Running& r) const;
-    void writeUsage(Running& r) const;
+    void WriteHelp(Running& r) const;
+    void WriteUsage(Running& r) const;
   private:
     typedef std::shared_ptr<Argument> ArgumentPtr;
 
-    Parser& insert(const std::string& name, ArgumentPtr arg, const Extra& extra);
+    Parser& AddArgument(const std::string& name, ArgumentPtr arg, const Extra& extra);
 
     std::string description_;
     std::string appname_;
