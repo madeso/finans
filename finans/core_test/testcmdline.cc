@@ -117,3 +117,13 @@ GTEST(TestStdVectorInts) {
   EXPECT_EQ(true, ok);
   EXPECT_THAT(ints, ElementsAre(2, 3, -5, 4));
 }
+
+GTEST(TestnonGreedyVector) {
+  std::vector<std::string> strings;
+  const bool ok = argparse::Parser::ParseComplete ==
+    argparse::Parser("description")
+    ("-s", strings)
+    .ParseArgs(argparse::Arguments("app.exe", { "-s", "cat", "-s", "dog", "-s", "fish" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_THAT(strings, ElementsAre("cat", "dog", "fish"));
+}
