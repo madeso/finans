@@ -159,7 +159,7 @@ namespace argparse
       case Count::MoreThanOne:
         combiner_(target_, converter_(args.Get("argument " + argname + ": expected atleast one argument")));
       case Count::ZeroOrMore:
-        while (args.is_empty() == false && IsOptional(args[0]) == false)
+        while (args.is_empty() == false)
         {
           combiner_(target_, converter_(args.Get("internal error")));
         }
@@ -276,7 +276,7 @@ namespace argparse
     }
 
     template<typename T>
-    Parser& operator()(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
+    Parser& AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
       return add<std::vector<T>, T>(name, strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar(metavar), argparse::PushBackVector<T>);
     }
 
