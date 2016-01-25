@@ -361,19 +361,21 @@ namespace argparse {
   }
 
 
-  Parser& Parser::AddArgument(const std::string& name, ArgumentPtr arg, const Extra& extra)
+  Parser& Parser::AddArgument(const std::string& commands, ArgumentPtr arg, const Extra& extra)
   {
-    if (IsOptional(name))
-    {
-      optionals_.insert(Optionals::value_type(name, arg));
-      helpOptional_.push_back(Help(name, extra));
-      return *this;
+    const auto names = Tokenize(commands, ",", true);
+    for(const auto name: names) {
+      if (IsOptional(name))
+      {
+        optionals_.insert(Optionals::value_type(name, arg));
+        helpOptional_.push_back(Help(name, extra));
+      }
+      else
+      {
+        positionals_.push_back(arg);
+        helpPositional_.push_back(Help(name, extra));
+      }
     }
-    else
-    {
-      positionals_.push_back(arg);
-      helpPositional_.push_back(Help(name, extra));
-      return *this;
-    }
+    return *this;
   }
 }
