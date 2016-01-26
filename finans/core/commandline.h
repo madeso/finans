@@ -36,27 +36,10 @@ namespace argparse
     const bool is_empty() const;
     const std::string name() const;
     const size_t size() const;
-    const std::string Get(const std::string& error = "no more arguments available");
+    const std::string ConsumeOne(const std::string& error = "no more arguments available");
   private:
     std::string name_;
     std::vector<std::string> args_;
-  };
-
-  template <typename T>
-  class Convert
-  {
-  public:
-    Convert(const std::string& name, T t)
-    {
-    }
-
-    Convert& operator()(const std::string& name, T t)
-    {
-    }
-
-    T operator()(const std::string& in)
-    {
-    }
   };
 
   template<typename T>
@@ -90,8 +73,8 @@ namespace argparse
       Const, MoreThanOne, Optional, None, ZeroOrMore
     };
 
-    Count(size_t c);
-    Count(Type t);
+    explicit Count(size_t c);
+    explicit Count(Type t);
 
     Type type() const;
     size_t count() const;
@@ -118,7 +101,7 @@ namespace argparse
   public:
     virtual ~Argument();
 
-    virtual void Parse(Running& r, Arguments& args, const std::string& argname) = 0;
+    virtual void ConsumeArguments(Running& r, Arguments& args, const std::string& argname) = 0;
   };
 
   typedef std::function<void(Running& r, Arguments&, const std::string&)> ArgumentCallback;
@@ -126,69 +109,41 @@ namespace argparse
   class CallbackArgument : public Argument
   {
   public:
-    CallbackArgument(const ArgumentCallback& func);
-    void Parse(Running& r, Arguments& args, const std::string& argname);
+    explicit CallbackArgument(const ArgumentCallback& func);
+    void ConsumeArguments(Running& r, Arguments& args, const std::string& argname);
   private:
     ArgumentCallback function_;
   };
 
+  class CommonArgument : public Argument
+  {
+  public:
+    explicit CommonArgument(const Count& co);
+
+    virtual void OnArgument(const std::string& str) = 0;
+    virtual void ConsumeArguments(Running&, Arguments& args, const std::string& argname) override;
+  private:
+    Count count_;
+  };
+
   template <typename T, typename V>
-  class ArgumentT : public Argument
+  class ArgumentT : public CommonArgument
   {
   public:
     ArgumentT(T& t, const Count& co, CombinerFunction(T, V) com, ConverterFunction(V) c)
-      : target_(t)
-      , count_(co)
+      : CommonArgument(co)
+      , target_(t)
       , combiner_(com)
       , converter_(c)
     {
     }
 
-    virtual void Parse(Running&, Arguments& args, const std::string& argname)
+    virtual void OnArgument(const std::string& arg) override
     {
-      switch (count_.type())
-      {
-      case Count::Const:
-        for (size_t i = 0; i < count_.count(); ++i)
-        {
-          std::stringstream ss;
-          ss << "argument " << argname << ": expected ";
-          if (count_.count() == 1)
-          {
-            ss << "one argument";
-          }
-          else
-          {
-            ss << count_.count() << " argument(s), " << i << " already given";
-          }
-          combiner_(target_, converter_(args.Get(ss.str())));
-
-          // abort on optional?
-        }
-        return;
-      case Count::MoreThanOne:
-        combiner_(target_, converter_(args.Get("argument " + argname + ": expected atleast one argument")));
-      case Count::ZeroOrMore:
-        while (args.is_empty() == false)
-        {
-          combiner_(target_, converter_(args.Get("internal error")));
-        }
-        return;
-      case Count::Optional:
-        if (args.is_empty()) return;
-        if (IsOptional(args[0])) return;
-        combiner_(target_, converter_(args.Get("internal error")));
-        return;
-      case Count::None:
-        return;
-      default:
-        assert(0 && "internal error, ArgumentT::parse invalid Count");
-        throw "internal error, ArgumentT::parse invalid Count";
-      }
+      combiner_(target_, converter_(arg));
     }
   private:
     T& target_;
-    Count count_;
     CombinerFunction(T, V) combiner_;
     ConverterFunction(V) converter_;
   };
@@ -270,7 +225,7 @@ namespace argparse
   template<typename T>
   class StringConverter {
   public:
-    StringConverter(const std::string name) : name_(name){
+    explicit StringConverter(const std::string name) : name_(name){
     }
 
     StringConverter& operator()(const std::string& s, const T& t) {
@@ -324,7 +279,7 @@ namespace argparse
       ParseComplete
     };
 
-    Parser(const std::string& d, const std::string aappname = "");
+    explicit Parser(const std::string& d, const std::string aappname = "");
 
     template<typename T>
     Parser& operator()(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
@@ -334,12 +289,12 @@ namespace argparse
 
     template<typename T>
     Parser& AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
-      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(argparse::Count::MoreThanOne).metavar(metavar), argparse::PushBackVector<T>);
+      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     template<typename T>
     Parser& AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(1).metavar(metavar), argparse::PushBackVector<T>);
+      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     template<typename T>

@@ -39,7 +39,7 @@ namespace argparse {
   {
     return args_.size();
   }
-  const std::string Arguments::Get(const std::string& error)
+  const std::string Arguments::ConsumeOne(const std::string& error)
   {
     if (is_empty()) throw ParserError(error);
     const std::string r = args_[0];
@@ -86,10 +86,58 @@ namespace argparse {
   {
   }
 
-  void CallbackArgument::Parse(Running& r, Arguments& args, const std::string& argname)
+  void CallbackArgument::ConsumeArguments(Running& r, Arguments& args, const std::string& argname)
   {
     function_(r, args, argname);
   }
+
+    CommonArgument::CommonArgument(const Count& co)
+      : count_(co)
+    {
+    }
+    
+    void CommonArgument::ConsumeArguments(Running&, Arguments& args, const std::string& argname) {
+      switch (count_.type())
+      {
+      case Count::Const:
+        for (size_t i = 0; i < count_.count(); ++i)
+        {
+          std::stringstream ss;
+          ss << "argument " << argname << ": expected ";
+          if (count_.count() == 1)
+          {
+            ss << "one argument";
+          }
+          else
+          {
+            ss << count_.count() << " argument(s), " << i << " already given";
+          }
+          OnArgument(args.ConsumeOne(ss.str()));
+
+          // abort on optional?
+        }
+        return;
+      case Count::MoreThanOne:
+        OnArgument(args.ConsumeOne("argument " + argname + ": expected atleast one argument"));
+        // fall through
+      case Count::ZeroOrMore:
+        while (args.is_empty() == false)
+        {
+          OnArgument(args.ConsumeOne("internal error"));
+        }
+        return;
+      case Count::Optional:
+        if (args.is_empty()) return;
+        if (IsOptional(args[0])) return;
+        OnArgument(args.ConsumeOne("internal error"));
+        return;
+      case Count::None:
+        return;
+      default:
+        assert(0 && "internal error, ArgumentT::parse invalid Count");
+        throw "internal error, ArgumentT::parse invalid Count";
+      }
+    }
 
   bool IsOptional(const std::string& arg)
   {
@@ -248,7 +296,7 @@ namespace argparse {
     , description_(d)
     , appname_(aappname)
   {
-    AddArgumentCallback("-h", CallHelp(this), Extra().count(Count::None).help("show this help message and exit"));
+    AddArgumentCallback("-h", CallHelp(this), Extra().count(Count(Count::None)).help("show this help message and exit"));
   }
 
   Parser& Parser::operator()(const std::string& name, ArgumentCallback func, const Extra& extra)
@@ -279,13 +327,13 @@ namespace argparse {
         if (IsOptional(args[0]))
         {
           // optional
-          const std::string arg = args.Get();
+          const std::string arg = args.ConsumeOne();
           Optionals::const_iterator r = optionals_.find(arg);
           if (r == optionals_.end())
           {
             throw ParserError("Unknown optional argument: " + arg); // todo: implement partial matching of arguments?
           }
-          r->second->Parse(running, args, arg);
+          r->second->ConsumeArguments(running, args, arg);
         }
         else
         {
@@ -295,7 +343,7 @@ namespace argparse {
           }
           ArgumentPtr p = positionals_[positionalIndex_];
           ++positionalIndex_;
-          p->Parse(running, args, "POSITIONAL"); // todo: give better name or something
+          p->ConsumeArguments(running, args, "POSITIONAL"); // todo: give better name or something
         }
       }
 
