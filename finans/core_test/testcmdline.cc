@@ -171,8 +171,6 @@ GTEST(TestPrecedencePos) {
   EXPECT_EQ("", another);
 }
 
-/*
-// currently failing. fix this
 GTEST(TestPrecedencePosOp) {
   const bool ok = argparse::Parser::ParseComplete ==
     parser.ParseArgs(argparse::Arguments("app.exe", { "-dog", "-op", "cat" }), output, error);
@@ -180,11 +178,7 @@ GTEST(TestPrecedencePosOp) {
   EXPECT_EQ("-dog", animal);
   EXPECT_EQ("cat", another);
 }
-*/
 
-// should optional be allowed before positional? How does help work with positional?
-/*
-// currently failing. fix this
 GTEST(TestPrecedenceOpPos) {
   const bool ok = argparse::Parser::ParseComplete ==
     parser.ParseArgs(argparse::Arguments("app.exe", { "-op", "cat", "dog" }), output, error);
@@ -192,4 +186,3 @@ GTEST(TestPrecedenceOpPos) {
   EXPECT_EQ("dog", animal);
   EXPECT_EQ("cat", another);
 }
-*/

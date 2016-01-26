@@ -324,19 +324,28 @@ namespace argparse {
     {
       while (false == args.is_empty())
       {
+        bool isParsed = false;
+        const bool isParsingPositionals = positionalIndex_ < positionals_.size();
+
         if (IsOptional(args[0]))
         {
           // optional
-          const std::string arg = args.ConsumeOne();
+          const std::string arg = args[0];
           Optionals::const_iterator r = optionals_.find(arg);
           if (r == optionals_.end())
           {
-            throw ParserError("Unknown optional argument: " + arg); // todo: implement partial matching of arguments?
+            if( isParsingPositionals == false ) {
+              throw ParserError("Unknown optional argument: " + arg); // todo: implement partial matching of arguments?
+            }
           }
-          r->second->ConsumeArguments(running, args, arg);
+          else {
+            isParsed = true;
+            args.ConsumeOne(); // the optional command = arg[0}
+            r->second->ConsumeArguments(running, args, arg);
+          }
         }
-        else
-        {
+        
+        if( isParsed == false ) {
           if (positionalIndex_ >= positionals_.size())
           {
             throw ParserError("All positional arguments have been consumed: " + args[0]);
