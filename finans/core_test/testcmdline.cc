@@ -10,6 +10,14 @@ using namespace testing;
 struct CommandlineTest : public Test {
   std::ostringstream output;
   std::ostringstream error;
+
+  argparse::Parser parser;
+  std::string animal;
+  std::string another;
+
+  CommandlineTest() : parser("description") {
+    parser("pos", animal)("-op", another);
+  }
 };
 
 #define GTEST(x) TEST_F(CommandlineTest, x)
@@ -154,3 +162,34 @@ GTEST(TestCommaOp) {
   EXPECT_EQ(true, ok);
   EXPECT_EQ(42, op);
 }
+
+GTEST(TestPrecedencePos) {
+  const bool ok = argparse::Parser::ParseComplete ==
+    parser.ParseArgs(argparse::Arguments("app.exe", {"dog"}), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("dog", animal);
+  EXPECT_EQ("", another);
+}
+
+/*
+// currently failing. fix this
+GTEST(TestPrecedencePosOp) {
+  const bool ok = argparse::Parser::ParseComplete ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "-dog", "-op", "cat" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("-dog", animal);
+  EXPECT_EQ("cat", another);
+}
+*/
+
+// should optional be allowed before positional? How does help work with positional?
+/*
+// currently failing. fix this
+GTEST(TestPrecedenceOpPos) {
+  const bool ok = argparse::Parser::ParseComplete ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "-op", "cat", "dog" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("dog", animal);
+  EXPECT_EQ("cat", another);
+}
+*/
