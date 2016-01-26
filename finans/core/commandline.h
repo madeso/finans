@@ -284,17 +284,17 @@ namespace argparse
     template<typename T>
     Parser& operator()(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
     {
-      return add<T, T>(name, var, extra, combiner);
+      return Add<T, T>(name, var, extra, combiner);
     }
 
     template<typename T>
     Parser& AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
-      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
+      return Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     template<typename T>
     Parser& AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      return add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar), argparse::PushBackVector<T>);
+      return Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     template<typename T>
@@ -305,7 +305,7 @@ namespace argparse
     Parser& operator()(const std::string& name, ArgumentCallback func, const Extra& extra = Extra());
 
     template<typename T, typename V>
-    Parser& add(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
+    Parser& Add(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
     {
       ArgumentPtr arg(new ArgumentT<T, V>(var, extra.count(), combiner, co));
       return AddArgument(name, arg, extra);
