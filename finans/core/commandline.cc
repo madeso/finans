@@ -81,16 +81,6 @@ namespace argparse {
   {
   }
 
-  CallbackArgument::CallbackArgument(const ArgumentCallback& func)
-    : function_(func)
-  {
-  }
-
-  void CallbackArgument::ConsumeArguments(Running& r, Arguments& args, const std::string& argname)
-  {
-    function_(r, args, argname);
-  }
-
     CommonArgument::CommonArgument(const Count& co)
       : count_(co)
     {

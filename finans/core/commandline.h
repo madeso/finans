@@ -106,15 +106,6 @@ namespace argparse
 
   typedef std::function<void(Running& r, Arguments&, const std::string&)> ArgumentCallback;
 
-  class CallbackArgument : public Argument
-  {
-  public:
-    explicit CallbackArgument(const ArgumentCallback& func);
-    void ConsumeArguments(Running& r, Arguments& args, const std::string& argname);
-  private:
-    ArgumentCallback function_;
-  };
-
   class CommonArgument : public Argument
   {
   public:
