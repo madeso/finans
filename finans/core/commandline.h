@@ -213,15 +213,6 @@ namespace argparse
 
   class Parser;
 
-  struct CallHelp
-  {
-    CallHelp(Parser* on);
-
-    void operator()(Running& r, Arguments& args, const std::string& argname);
-
-    Parser* parser;
-  };
-
   template<typename T>
   class StringConverter {
   public:
@@ -310,8 +301,6 @@ namespace argparse
       ArgumentPtr arg(new ArgumentT<T, V>(var, extra.count(), combiner, co));
       return AddArgument(name, arg, extra);
     }
-
-    Parser& AddArgumentCallback(const std::string& name, ArgumentCallback func, const Extra& extra);
 
     ParseStatus ParseArgs(int argc, char* argv[], std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
     ParseStatus ParseArgs(const Arguments& arguments, std::ostream& out = std::cout, std::ostream& error = std::cerr) const;

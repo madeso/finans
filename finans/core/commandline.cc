@@ -280,34 +280,29 @@ namespace argparse {
     return help_;
   }
 
-  CallHelp::CallHelp(Parser* on)
-    : parser(on)
+  struct CallHelp : public Argument
   {
-  }
+    CallHelp(Parser* on)
+      : parser(on)
+    {
+    }
 
-  void CallHelp::operator()(Running& r, Arguments& args, const std::string& argname)
-  {
-    parser->WriteHelp(r);
-    exit(0);
-  }
+    void ConsumeArguments(Running& r, Arguments& args, const std::string& argname) override
+    {
+      parser->WriteHelp(r);
+      exit(0);
+    }
+
+    Parser* parser;
+  };
 
   Parser::Parser(const std::string& d, const std::string aappname)
     : positionalIndex_(0)
     , description_(d)
     , appname_(aappname)
   {
-    AddArgumentCallback("-h", CallHelp(this), Extra().count(Count(Count::None)).help("show this help message and exit"));
-  }
-
-  Parser& Parser::operator()(const std::string& name, ArgumentCallback func, const Extra& extra)
-  {
-    return AddArgumentCallback(name, func, extra);
-  }
-
-  Parser& Parser::AddArgumentCallback(const std::string& name, ArgumentCallback func, const Extra& extra)
-  {
-    ArgumentPtr arg(new CallbackArgument(func));
-    return AddArgument(name, arg, extra);
+    std::shared_ptr<Argument> arg(new CallHelp(this));
+    AddArgument("-h", arg, Extra().count(Count(Count::None)).help("show this help message and exit"));
   }
 
   Parser::ParseStatus Parser::ParseArgs(int argc, char* argv[], std::ostream& out, std::ostream& error) const
