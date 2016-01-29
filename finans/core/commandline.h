@@ -104,8 +104,6 @@ namespace argparse
     virtual void ConsumeArguments(Running& r, Arguments& args, const std::string& argname) = 0;
   };
 
-  typedef std::function<void(Running& r, Arguments&, const std::string&)> ArgumentCallback;
-
   class CommonArgument : public Argument
   {
   public:
@@ -283,8 +281,6 @@ namespace argparse
     Parser& operator()(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
       return AddVector<T>(name, strings, metavar);
     }
-
-    Parser& operator()(const std::string& name, ArgumentCallback func, const Extra& extra = Extra());
 
     template<typename T, typename V>
     Parser& Add(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
