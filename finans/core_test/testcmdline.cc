@@ -163,6 +163,16 @@ GTEST(TestCommaOp) {
   EXPECT_EQ(42, op);
 }
 
+GTEST(TestSpecifyTwice) {
+  int op = 2;
+  const bool ok = argparse::Parser::ParseComplete ==
+    argparse::Parser("description")
+    ("-int,-i", op)
+    .ParseArgs(argparse::Arguments("app.exe", { "-int", "42", "-i", "50" }), output, error);
+  EXPECT_EQ(false, ok);
+  EXPECT_EQ(42, op);
+}
+
 GTEST(TestPrecedencePos) {
   const bool ok = argparse::Parser::ParseComplete ==
     parser.ParseArgs(argparse::Arguments("app.exe", {"dog"}), output, error);

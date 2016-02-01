@@ -99,35 +99,35 @@ namespace argparse
   class Argument
   {
   public:
+    explicit Argument(const Count& co);
     virtual ~Argument();
 
-    virtual void ConsumeArguments(Running& r, Arguments& args, const std::string& argname) = 0;
-  };
+    virtual void OnArgument(Running& running, const std::string& str) = 0;
+    void ConsumeArguments(Running& running, Arguments& args, const std::string& argname);
 
-  class CommonArgument : public Argument
-  {
-  public:
-    explicit CommonArgument(const Count& co);
+    bool has_been_parsed() const;
+    void set_has_been_parsed(bool v);
 
-    virtual void OnArgument(const std::string& str) = 0;
-    virtual void ConsumeArguments(Running&, Arguments& args, const std::string& argname) override;
+    void set_has_several();
   private:
     Count count_;
+    bool has_several_;
+    bool has_been_parsed_;
   };
 
   template <typename T, typename V>
-  class ArgumentT : public CommonArgument
+  class ArgumentT : public Argument
   {
   public:
     ArgumentT(T& t, const Count& co, CombinerFunction(T, V) com, ConverterFunction(V) c)
-      : CommonArgument(co)
+      : Argument(co)
       , target_(t)
       , combiner_(com)
       , converter_(c)
     {
     }
 
-    virtual void OnArgument(const std::string& arg) override
+    virtual void OnArgument(Running& running, const std::string& arg) override
     {
       combiner_(target_, converter_(arg));
     }
@@ -158,10 +158,14 @@ namespace argparse
     /// the meta variable, used in usage display and help display for the arguments
     Extra& metavar(const std::string& metavar);
     const std::string& metavar() const;
+
+    Extra& several();
+    bool has_several() const;
   private:
     std::string help_;
     Count count_;
     std::string metaVar_;
+    bool has_several_;
   };
 
   std::string ToUpper(const std::string& s);
@@ -274,7 +278,7 @@ namespace argparse
 
     template<typename T>
     Parser& AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      return Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar), argparse::PushBackVector<T>);
+      return Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar).several(), argparse::PushBackVector<T>);
     }
 
     template<typename T>

@@ -81,53 +81,68 @@ namespace argparse {
   {
   }
 
-    CommonArgument::CommonArgument(const Count& co)
-      : count_(co)
-    {
-    }
-    
-    void CommonArgument::ConsumeArguments(Running&, Arguments& args, const std::string& argname) {
-      switch (count_.type())
-      {
-      case Count::Const:
-        for (size_t i = 0; i < count_.count(); ++i)
-        {
-          std::stringstream ss;
-          ss << "argument " << argname << ": expected ";
-          if (count_.count() == 1)
-          {
-            ss << "one argument";
-          }
-          else
-          {
-            ss << count_.count() << " argument(s), " << i << " already given";
-          }
-          OnArgument(args.ConsumeOne(ss.str()));
+  Argument::Argument(const Count& co)
+    : count_(co)
+    , has_been_parsed_(false)
+    , has_several_(false)
+  {
+  }
 
-          // abort on optional?
-        }
-        return;
-      case Count::MoreThanOne:
-        OnArgument(args.ConsumeOne("argument " + argname + ": expected atleast one argument"));
-        // fall through
-      case Count::ZeroOrMore:
-        while (args.is_empty() == false)
+  bool Argument::has_been_parsed() const {
+    return has_been_parsed_;
+  }
+
+  void Argument::set_has_been_parsed(bool v) {
+    if (has_several_) return;
+    has_been_parsed_ = v;
+  }
+    
+  void Argument::ConsumeArguments(Running& r, Arguments& args, const std::string& argname) {
+    switch (count_.type())
+    {
+    case Count::Const:
+      for (size_t i = 0; i < count_.count(); ++i)
+      {
+        std::stringstream ss;
+        ss << "argument " << argname << ": expected ";
+        if (count_.count() == 1)
         {
-          OnArgument(args.ConsumeOne("internal error"));
+          ss << "one argument";
         }
-        return;
-      case Count::Optional:
-        if (args.is_empty()) return;
-        if (IsOptional(args[0])) return;
-        OnArgument(args.ConsumeOne("internal error"));
-        return;
-      case Count::None:
-        return;
-      default:
-        assert(0 && "internal error, ArgumentT::parse invalid Count");
-        throw "internal error, ArgumentT::parse invalid Count";
+        else
+        {
+          ss << count_.count() << " argument(s), " << i << " already given";
+        }
+        OnArgument(r, args.ConsumeOne(ss.str()));
+
+        // abort on optional?
       }
+      return;
+    case Count::MoreThanOne:
+      OnArgument(r, args.ConsumeOne("argument " + argname + ": expected atleast one argument"));
+      // fall through
+    case Count::ZeroOrMore:
+      while (args.is_empty() == false)
+      {
+        OnArgument(r, args.ConsumeOne("internal error"));
+      }
+      return;
+    case Count::Optional:
+      if (args.is_empty()) return;
+      if (IsOptional(args[0])) return;
+      OnArgument(r, args.ConsumeOne("internal error"));
+      return;
+    case Count::None:
+      return;
+    default:
+      assert(0 && "internal error, ArgumentT::parse invalid Count");
+      throw "internal error, ArgumentT::parse invalid Count";
     }
+  }
+
+  void Argument::set_has_several() {
+    has_several_ = true;
+  }
 
   bool IsOptional(const std::string& arg)
   {
@@ -137,6 +152,7 @@ namespace argparse {
 
   Extra::Extra()
     : count_(1)
+    , has_several_(false)
   {
   }
 
@@ -170,6 +186,14 @@ namespace argparse {
   const std::string& Extra::metavar() const
   {
     return metaVar_;
+  }
+
+  Extra& Extra::several() {
+    has_several_ = true;
+    return *this;
+  }
+  bool Extra::has_several() const {
+    return has_several_;
   }
 
   std::string ToUpper(const std::string& s)
@@ -273,11 +297,12 @@ namespace argparse {
   struct CallHelp : public Argument
   {
     CallHelp(Parser* on)
-      : parser(on)
+      : Argument( Count(Count::Optional) )
+      , parser(on)
     {
     }
 
-    void ConsumeArguments(Running& r, Arguments& args, const std::string& argname) override
+    void OnArgument(Running& r, const std::string& argname) override
     {
       parser->WriteHelp(r);
       exit(0);
@@ -324,9 +349,12 @@ namespace argparse {
             }
           }
           else {
-            isParsed = true;
-            args.ConsumeOne(); // the optional command = arg[0}
-            r->second->ConsumeArguments(running, args, arg);
+            if( false == r->second->has_been_parsed() ) {
+              isParsed = true;
+              args.ConsumeOne(); // the optional command = arg[0}
+              r->second->ConsumeArguments(running, args, arg);
+              r->second->set_has_been_parsed(true);
+            }
           }
         }
         
@@ -405,6 +433,9 @@ namespace argparse {
 
   Parser& Parser::AddArgument(const std::string& commands, ArgumentPtr arg, const Extra& extra)
   {
+    if( extra.has_several() ) {
+      arg->set_has_several();
+    }
     const auto names = Tokenize(commands, ",", true);
     for(const auto name: names) {
       if (IsOptional(name))
