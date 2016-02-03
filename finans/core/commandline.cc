@@ -128,11 +128,18 @@ namespace argparse {
       }
       return;
     case Count::Optional:
-      if (args.is_empty()) return;
-      if (IsOptional(args[0])) return;
+      if (args.is_empty()) {
+        OnArgument(r, "");
+        return;
+      }
+      if (IsOptional(args[0])) {
+        OnArgument(r, "");
+        return;
+      }
       OnArgument(r, args.ConsumeOne("internal error"));
       return;
     case Count::None:
+      OnArgument(r, "");
       return;
     default:
       assert(0 && "internal error, ArgumentT::parse invalid Count");
