@@ -196,3 +196,23 @@ GTEST(TestPrecedenceOpPos) {
   EXPECT_EQ("dog", animal);
   EXPECT_EQ("cat", another);
 }
+
+GTEST(TestStoreConstInt) {
+  int op = 12;
+  const bool ok = argparse::Parser::ParseComplete ==
+    argparse::Parser("description")
+    .StoreConst("-store", op, 42)
+    .ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ(42, op);
+}
+
+GTEST(TestStoreConstString) {
+  std::string op = "";
+  const bool ok = argparse::Parser::ParseComplete ==
+    argparse::Parser("description")
+    .StoreConst<std::string>("-store", op, "dog")
+    .ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("dog", op);
+}

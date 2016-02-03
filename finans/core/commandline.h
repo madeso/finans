@@ -137,6 +137,28 @@ namespace argparse
     ConverterFunction(V) converter_;
   };
 
+  template <typename T>
+  class ArgumentStoreConst : public Argument
+  {
+  public:
+    ArgumentStoreConst(T& t, const T& value, CombinerFunction(T, T) com)
+      : Argument(Count(Count::None))
+      , target_(t)
+      , combiner_(com)
+      , value_(value)
+    {
+    }
+
+    virtual void OnArgument(Running& running, const std::string& arg) override
+    {
+      combiner_(target_, value_);
+    }
+  private:
+    T& target_;
+    const T value_;
+    CombinerFunction(T, T) combiner_;
+  };
+
   /// internal function.
   /// @returns true if arg is to be considered as an optional
   bool IsOptional(const std::string& arg);
@@ -290,6 +312,15 @@ namespace argparse
     Parser& Add(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
     {
       ArgumentPtr arg(new ArgumentT<T, V>(var, extra.count(), combiner, co));
+      return AddArgument(name, arg, extra);
+    }
+
+    template<typename T>
+    Parser& StoreConst(const std::string& name, T& var, const T& value, const Extra& e = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>)
+    {
+      auto extra = e;
+      extra.count(Count(Count::None));
+      ArgumentPtr arg(new ArgumentStoreConst<T>(var, value, combiner));
       return AddArgument(name, arg, extra);
     }
 
