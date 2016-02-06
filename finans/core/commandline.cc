@@ -378,7 +378,7 @@ namespace argparse {
 
       if (positionalIndex_ != positionals_.size())
       {
-        throw ParserError("too few arguments"); // todo: list a few missing arguments...
+        throw ParserError("too few arguments."); // todo: list a few missing arguments...
       }
 
       return ParseComplete;
@@ -386,7 +386,8 @@ namespace argparse {
     catch (ParserError& p)
     {
       WriteUsage(running);
-      error << running.app << ": " << p.what() << std::endl << std::endl;
+      error << p.what() << "\n";
+      out << "\n";
       return ParseFailed;
     }
   }
