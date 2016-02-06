@@ -78,7 +78,7 @@ GTEST(TestPositionalValueErr) {
     ("op", op)
     .ParseArgs(argparse::Arguments("app.exe", {}), output, error);
   EXPECT_EQ(false, ok);
-  EXPECT_EQ("error: to few arguments.\n", error.str());
+  EXPECT_EQ("error: too few arguments.\n", error.str());
   EXPECT_EQ(42, op); // not touched
 }
 
