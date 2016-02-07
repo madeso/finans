@@ -224,7 +224,9 @@ namespace argparse {
   {
     if (IsOptional(name_))
     {
-      return "[" + name_ + " " + GetMetavarReprestentation() + "]";
+      const auto rep = GetMetavarReprestentation();
+      if( rep.empty()) return "[" + name_ + "]";
+      return "[" + name_ + " " + rep + "]";
     }
     else
     {
@@ -425,7 +427,7 @@ namespace argparse {
 
   void Parser::WriteUsage(Running& r) const
   {
-    r.o << "Usage: " << r.app;
+    r.o << "Usage:";
     for (const Help& optional : helpOptional_)
     {
       r.o << " " << optional.GetUsage();
@@ -435,7 +437,6 @@ namespace argparse {
     {
       r.o << " " << positional.GetUsage();
     }
-    r.o << std::endl;
   }
 
 
