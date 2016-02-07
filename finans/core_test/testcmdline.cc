@@ -29,6 +29,7 @@ GTEST(TestEmpty) {
   EXPECT_EQ(true, ok);
 
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
 }
 
 GTEST(TestError) {
@@ -36,6 +37,8 @@ GTEST(TestError) {
     argparse::Parser("description")
     .ParseArgs(argparse::Arguments("app.exe", { "hello", "world" }), output, error);
   EXPECT_EQ(false, ok);
+  EXPECT_EQ("Usage: [-h]\n", output.str());
+  EXPECT_EQ("error: All positionals have been consumed: hello", error.str());
 }
 
 GTEST(TestOptionalDefault) {
@@ -46,6 +49,7 @@ GTEST(TestOptionalDefault) {
     .ParseArgs(argparse::Arguments("app.exe", {}), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ(2, op);
 }
 
@@ -57,6 +61,7 @@ GTEST(TestOptionalValue) {
     .ParseArgs(argparse::Arguments("app.exe", {"-op", "42"}), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ(42, op);
 }
 
@@ -68,6 +73,7 @@ GTEST(TestPositionalValue) {
     .ParseArgs(argparse::Arguments("app.exe", { "42" }), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ(42, op);
 }
 
@@ -79,6 +85,7 @@ GTEST(TestPositionalValueErr) {
     .ParseArgs(argparse::Arguments("app.exe", {}), output, error);
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: too few arguments.\n", error.str());
+  EXPECT_EQ("Usage: [-h] [op]\n", output.str());
   EXPECT_EQ(42, op); // not touched
 }
 
@@ -90,6 +97,7 @@ GTEST(TestStdVector) {
     .ParseArgs(argparse::Arguments("app.exe", {"-strings", "cat", "dog", "fish"}), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_THAT(strings, ElementsAre("cat", "dog", "fish"));
 }
 
@@ -100,6 +108,8 @@ GTEST(TestStdVectorInts) {
     .AddGreedy("-ints", ints, "string")
     .ParseArgs(argparse::Arguments("app.exe", { "-ints", "2", "3", "-5", "4" }), output, error);
   EXPECT_EQ(true, ok);
+  EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_THAT(ints, ElementsAre(2, 3, -5, 4));
 }
 
@@ -111,6 +121,7 @@ GTEST(TestNonGreedyVector) {
     .ParseArgs(argparse::Arguments("app.exe", { "-s", "cat", "-s", "dog", "-s", "fish" }), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_THAT(strings, ElementsAre("cat", "dog", "fish"));
 }
 
@@ -129,6 +140,7 @@ GTEST(TestEnum) {
     .ParseArgs(argparse::Arguments("app.exe", { "tod" }), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ(Day::TODAY, op);
 }
 
@@ -140,6 +152,7 @@ GTEST(TestCommaOp) {
     .ParseArgs(argparse::Arguments("app.exe", { "-int", "42" }), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ(42, op);
 }
 
@@ -151,6 +164,7 @@ GTEST(TestSpecifyTwice) {
     .ParseArgs(argparse::Arguments("app.exe", { "-int", "42", "-i", "50" }), output, error);
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: All positional arguments have been consumed: -i\n", error.str());
+  EXPECT_EQ("Usage: [h] [-int,-i [INT]]\n", output.str());
   EXPECT_EQ(42, op);
 }
 
@@ -159,6 +173,7 @@ GTEST(TestPrecedencePos) {
     parser.ParseArgs(argparse::Arguments("app.exe", {"dog"}), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ("dog", animal);
   EXPECT_EQ("", another);
 }
@@ -167,6 +182,8 @@ GTEST(TestPrecedencePosOp) {
   const bool ok = argparse::Parser::ParseComplete ==
     parser.ParseArgs(argparse::Arguments("app.exe", { "-dog", "-op", "cat" }), output, error);
   EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
+  EXPECT_EQ("", error.str());
   EXPECT_EQ("-dog", animal);
   EXPECT_EQ("cat", another);
 }
@@ -176,6 +193,7 @@ GTEST(TestPrecedenceOpPos) {
     parser.ParseArgs(argparse::Arguments("app.exe", { "-op", "cat", "dog" }), output, error);
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
+  EXPECT_EQ("", output.str());
   EXPECT_EQ("dog", animal);
   EXPECT_EQ("cat", another);
 }
@@ -187,6 +205,7 @@ GTEST(TestStoreConstInt) {
     .StoreConst("-store", op, 42)
     .ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
   EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
   EXPECT_EQ(42, op);
 }
@@ -198,6 +217,7 @@ GTEST(TestStoreConstString) {
     .StoreConst<std::string>("-store", op, "dog")
     .ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
   EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
   EXPECT_EQ("dog", op);
 }
