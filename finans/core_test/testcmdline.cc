@@ -38,7 +38,7 @@ GTEST(TestError) {
     .ParseArgs(argparse::Arguments("app.exe", { "hello", "world" }), output, error);
   EXPECT_EQ(false, ok);
   EXPECT_EQ("Usage: [-h]\n", output.str());
-  EXPECT_EQ("error: All positionals have been consumed: hello", error.str());
+  EXPECT_EQ("error: All positional arguments have been consumed: hello\n", error.str());
 }
 
 GTEST(TestOptionalDefault) {
