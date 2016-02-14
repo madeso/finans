@@ -324,6 +324,7 @@ namespace argparse {
     : positionalIndex_(0)
     , description_(d)
     , appname_(aappname)
+    , sub_parsers_("subparser")
   {
     std::shared_ptr<Argument> arg(new CallHelp(this));
     AddArgument("-h", arg, Extra().count(Count(Count::None)).help("show this help message and exit"));
@@ -336,6 +337,7 @@ namespace argparse {
   }
 
   Parser& Parser::AddSubParser(const std::string& name, SubParser* parser) {
+    sub_parsers_(name, parser);
     return *this;
   }
 
@@ -370,15 +372,35 @@ namespace argparse {
             }
           }
         }
+
+        bool consumed = false;
         
         if( isParsed == false ) {
           if (positionalIndex_ >= positionals_.size())
           {
-            throw ParserError("All positional arguments have been consumed: " + args[0]);
+            if( sub_parsers_.empty() ) {
+              throw ParserError("All positional arguments have been consumed: " + args[0]);
+            }
+            else {
+              std::string subname;
+              SubParser* sub = sub_parsers_.Convert(args[0], &subname);
+              Parser parser(args[0]);
+              sub->AddParser(parser);
+              consumed = true;
+              args.ConsumeOne("SUBCOMMAND");
+              auto res = parser.ParseArgs(args, out, error);
+              if (res != ParseStatus::ParseComplete) {
+                error << "Failed to parse " << subname << "\n";
+                return res;
+              }
+              return ParseStatus::ParseComplete;
+            }
           }
-          ArgumentPtr p = positionals_[positionalIndex_];
-          ++positionalIndex_;
-          p->ConsumeArguments(running, args, "POSITIONAL"); // todo: give better name or something
+          if (consumed == false) {
+            ArgumentPtr p = positionals_[positionalIndex_];
+            ++positionalIndex_;
+            p->ConsumeArguments(running, args, "POSITIONAL"); // todo: give better name or something
+          }
         }
       }
 

@@ -240,20 +240,19 @@ namespace argparse
       return *this;
     }
 
-    T Convert(const std::string& a) const {
-      
-
+    T Convert(const std::string& a, std::string* oname=nullptr) const {
       const auto s = ToUpper(a);
 
       const auto r = exact_.find(s);
       if (r != exact_.end()) {
+        if( oname ) *oname = r->first;
         return r->second;
       }
 
-        std::vector<T> res;
+      std::map<std::string, T> res;
       for (const auto& n : entries_ ) {
         if (StartsWith(n.first, s)) {
-          res.push_back(n.second);
+          res.insert(std::make_pair(n.first, n.second));
         }
       }
 
@@ -261,12 +260,18 @@ namespace argparse
         throw ParserError("Unable to parse " + s + " to a " + name_);
       }
       else if (res.size() == 1) {
-        return res[0];
+        auto ret = *res.begin();
+        if (oname) *oname = ret.first;
+        return ret.second;
       }
       else {
         // todo: list all values...
         throw ParserError("Unable to parse " + s + ": Ambiguous value.");
       }
+    }
+
+    bool empty() const {
+      return entries_.empty();
     }
 
   private:
@@ -362,6 +367,8 @@ namespace argparse
     typedef std::vector<ArgumentPtr> Positionals;
     Positionals positionals_;
     mutable size_t positionalIndex_; // todo: mutable or change parseArgs to nonconst?
+
+    StringConverter<SubParser*> sub_parsers_;
 
     std::vector<Help> helpOptional_;
     std::vector<Help> helpPositional_;
