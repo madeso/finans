@@ -279,5 +279,24 @@ GTEST(TestSubParserPositional) {
   EXPECT_EQ("", sp2.name);
 }
 
-// todo: test error
+GTEST(TestSubParserCallbackError) {
+  const bool ok = argparse::Parser::ParseComplete ==
+    sub.ParseArgs(argparse::Arguments("app.exe", { "on", "cat" }), output, error);
+  EXPECT_EQ(false, ok);
+  EXPECT_EQ("Usage: [-h] ONE [-h] [-name [name]]\n", output.str());
+  EXPECT_EQ("error: Failed to parse ONE:\nerror: All positional arguments have been consumed: cat\n", error.str());
+  EXPECT_EQ("", sp1.name);
+  EXPECT_EQ("", sp2.name);
+}
+
+GTEST(TestSubParserInvalid) {
+  const bool ok = argparse::Parser::ParseComplete ==
+    sub.ParseArgs(argparse::Arguments("app.exe", { "dog", "cat" }), output, error);
+  EXPECT_EQ(false, ok);
+  EXPECT_EQ("Usage: [-h] {ONE|TWO}\n", output.str());
+  EXPECT_EQ("error: Unable to match DOG as a subparser.\n", error.str());
+  EXPECT_EQ("", sp1.name);
+  EXPECT_EQ("", sp2.name);
+}
+
 // todo: test help string
