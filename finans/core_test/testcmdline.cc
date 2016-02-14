@@ -278,3 +278,6 @@ GTEST(TestSubParserPositional) {
   EXPECT_EQ("dog", sp1.name);
   EXPECT_EQ("", sp2.name);
 }
+
+// todo: test error
+// todo: test help string
