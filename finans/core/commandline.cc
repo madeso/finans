@@ -335,6 +335,10 @@ namespace argparse {
     return ParseArgs(args, out, error);
   }
 
+  Parser& Parser::AddSubParser(const std::string& name, SubParser* parser) {
+    return *this;
+  }
+
   Parser::ParseStatus Parser::ParseArgs(const Arguments& arguments, std::ostream& out, std::ostream& error) const {
     Arguments args = arguments;
     Running running(arguments.name(), out);
@@ -446,18 +450,24 @@ namespace argparse {
       arg->set_has_several();
     }
     const auto names = Tokenize(commands, ",", true);
+    std::string thename = "";
     for(const auto name: names) {
       if (IsOptional(name))
       {
         optionals_.insert(Optionals::value_type(name, arg));
-        helpOptional_.push_back(Help(name, extra));
+        if (thename.empty()) thename = name.substr(1);
       }
       else
       {
         positionals_.push_back(arg);
-        helpPositional_.push_back(Help(name, extra));
+        if( thename.empty() ) thename = name;
       }
     }
+    Extra e = extra;
+    if (e.metavar().empty()) {
+      e.metavar(thename);
+    }
+    helpOptional_.push_back(Help(commands, e));
     return *this;
   }
 }

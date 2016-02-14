@@ -275,6 +275,22 @@ namespace argparse
     std::map<std::string, T> exact_;
   };
 
+  class SubParser {
+  public:
+    SubParser() {}
+
+    // this class is not meant to instantiate
+    // but this is here to make sure destructors are called
+    // in case one would only keep a SubParser reference
+    virtual ~SubParser() {}
+
+    // add sub parser arguments
+    virtual void AddParser(argparse::Parser& parser) = 0;
+
+    // called when parsing is done
+    virtual void ParseCompleted() = 0;
+  };
+
   /// main entry class that contains all arguments and does all the parsing.
   class Parser
   {
@@ -323,6 +339,8 @@ namespace argparse
       ArgumentPtr arg(new ArgumentStoreConst<T>(var, value, combiner));
       return AddArgument(name, arg, extra);
     }
+
+    Parser& AddSubParser(const std::string& name, SubParser* parser);
 
     ParseStatus ParseArgs(int argc, char* argv[], std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
     ParseStatus ParseArgs(const Arguments& arguments, std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
