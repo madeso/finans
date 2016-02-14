@@ -257,7 +257,7 @@ namespace argparse
       }
 
       if (res.empty()) {
-        throw ParserError("Unable to parse " + s + " to a " + name_);
+        throw ParserError("Unable to match " + s + " as a " + name_ + ".");
       }
       else if (res.size() == 1) {
         auto ret = *res.begin();
@@ -266,7 +266,7 @@ namespace argparse
       }
       else {
         // todo: list all values...
-        throw ParserError("Unable to parse " + s + ": Ambiguous value.");
+        throw ParserError("Unable to match " + s + ": Ambiguous value.");
       }
     }
 
