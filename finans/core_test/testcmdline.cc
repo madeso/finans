@@ -7,6 +7,21 @@
 
 using namespace testing;
 
+class TestSubParser : public argparse::SubParser {
+public:
+  TestSubParser() {
+  }
+
+  void AddParser(argparse::Parser& parser) override {
+    parser("-name", name);
+  }
+
+  void ParseCompleted() override {
+  }
+
+  std::string name;
+};
+
 struct CommandlineTest : public Test {
   std::ostringstream output;
   std::ostringstream error;
@@ -15,8 +30,13 @@ struct CommandlineTest : public Test {
   std::string animal;
   std::string another;
 
-  CommandlineTest() : parser("description") {
+  TestSubParser sp1;
+  TestSubParser sp2;
+  argparse::Parser sub;
+
+  CommandlineTest() : parser("description"), sub("description") {
     parser("pos", animal)("-op", another);
+    sub.AddSubParser("one", &sp1).AddSubParser("two", &sp2);
   }
 };
 
@@ -164,7 +184,7 @@ GTEST(TestSpecifyTwice) {
     .ParseArgs(argparse::Arguments("app.exe", { "-int", "42", "-i", "50" }), output, error);
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: All positional arguments have been consumed: -i\n", error.str());
-  EXPECT_EQ("Usage: [h] [-int,-i [INT]]\n", output.str());
+  EXPECT_EQ("Usage: [-h] [-int,-i [int]]\n", output.str());
   EXPECT_EQ(42, op);
 }
 
@@ -220,4 +240,41 @@ GTEST(TestStoreConstString) {
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
   EXPECT_EQ("dog", op);
+}
+
+
+GTEST(TestSubParserBasic) {
+  const bool ok = argparse::Parser::ParseComplete ==
+    sub.ParseArgs(argparse::Arguments("app.exe", { "one", "-name", "dog" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
+  EXPECT_EQ("", error.str());
+  EXPECT_EQ("dog", sp1.name);
+  EXPECT_EQ("", sp2.name);
+}
+
+GTEST(TestSubParserOptional) {
+  std::string op = "";
+  sub("-op", op);
+  const bool ok = argparse::Parser::ParseComplete ==
+    sub.ParseArgs(argparse::Arguments("app.exe", { "-op", "cat", "on", "-name", "dog" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
+  EXPECT_EQ("", error.str());
+  EXPECT_EQ("cat", op);
+  EXPECT_EQ("dog", sp1.name);
+  EXPECT_EQ("", sp2.name);
+}
+
+GTEST(TestSubParserPositional) {
+  std::string op = "";
+  sub("op", op);
+  const bool ok = argparse::Parser::ParseComplete ==
+    sub.ParseArgs(argparse::Arguments("app.exe", { "cat", "on", "-name", "dog" }), output, error);
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
+  EXPECT_EQ("", error.str());
+  EXPECT_EQ("cat", op);
+  EXPECT_EQ("dog", sp1.name);
+  EXPECT_EQ("", sp2.name);
 }
