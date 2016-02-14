@@ -279,7 +279,7 @@ GTEST(TestSubParserPositional) {
   EXPECT_EQ("", sp2.name);
 }
 
-GTEST(TestSubParserCallbackError) {
+GTEST(TestCallingSubParserWithBadArguments) {
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "on", "cat" }), output, error);
   EXPECT_EQ(false, ok);
@@ -289,7 +289,7 @@ GTEST(TestSubParserCallbackError) {
   EXPECT_EQ("", sp2.name);
 }
 
-GTEST(TestSubParserInvalid) {
+GTEST(TestCallingInvalidSubParser) {
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "dog", "cat" }), output, error);
   EXPECT_EQ(false, ok);
