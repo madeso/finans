@@ -299,4 +299,4 @@ GTEST(TestSubParserInvalid) {
   EXPECT_EQ("", sp2.name);
 }
 
-// todo: test help string
+// todo: test help string when calling -h
