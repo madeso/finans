@@ -459,6 +459,20 @@ namespace argparse {
       r.o << " " << optional.GetUsage();
     }
 
+    if (false == sub_parsers_.empty()) {
+      const auto sp = sub_parsers_.names();
+      r.o << " {";
+      bool first = true;
+      for (const auto& p : sp) {
+        if (first == false) {
+          r.o << "|";
+        }
+        first = false;
+        r.o << p;
+      }
+      r.o << "}";
+    }
+
     for (const Help& positional : helpPositional_)
     {
       r.o << " " << positional.GetUsage();

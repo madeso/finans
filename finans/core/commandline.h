@@ -274,6 +274,14 @@ namespace argparse
       return entries_.empty();
     }
 
+    const std::vector<std::string> names() const {
+      std::vector<std::string> ret;
+      for (const auto& kvp : exact_) {
+        ret.push_back(kvp.first);
+      }
+      return ret;
+    }
+
   private:
     std::string name_;
     std::vector<std::pair<std::string, T>> entries_;
