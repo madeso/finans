@@ -71,9 +71,10 @@ namespace argparse {
   }
 
 
-  Running::Running(const std::string& aapp, std::ostream& ao)
+  Running::Running(const std::string& aapp, std::ostream& ao, std::ostream& ae)
     : app(aapp)
     , o(ao)
+    , e(ae)
   {
   }
 
@@ -356,8 +357,12 @@ namespace argparse {
 
   Parser::ParseStatus Parser::ParseArgs(const Arguments& arguments, std::ostream& out, std::ostream& error) const {
     Arguments args = arguments;
-    Running running(arguments.name(), out);
+    Running running(arguments.name(), out, error);
 
+    return DoParseArgs(args, running);
+  }
+
+  Parser::ParseStatus Parser::DoParseArgs(Arguments& args, Running& running) const {
     try
     {
       while (false == args.is_empty())
@@ -372,12 +377,12 @@ namespace argparse {
           Optionals::const_iterator r = optionals_.find(arg);
           if (r == optionals_.end())
           {
-            if( isParsingPositionals == false ) {
+            if (isParsingPositionals == false) {
               throw ParserError("Unknown optional argument: " + arg); // todo: implement partial matching of arguments?
             }
           }
           else {
-            if( false == r->second->has_been_parsed() ) {
+            if (false == r->second->has_been_parsed()) {
               isParsed = true;
               args.ConsumeOne(); // the optional command = arg[0}
               r->second->ConsumeArguments(running, args, arg);
@@ -387,11 +392,11 @@ namespace argparse {
         }
 
         bool consumed = false;
-        
-        if( isParsed == false ) {
+
+        if (isParsed == false) {
           if (positionalIndex_ >= positionals_.size())
           {
-            if( sub_parsers_.empty() ) {
+            if (sub_parsers_.empty()) {
               throw ParserError("All positional arguments have been consumed: " + args[0]);
             }
             else {
@@ -401,9 +406,9 @@ namespace argparse {
               sub->AddParser(parser);
               consumed = true;
               args.ConsumeOne("SUBCOMMAND");
-              auto res = parser.ParseArgs(args, out, error);
+              auto res = parser.DoParseArgs(args, running);
               if (res != ParseStatus::ParseComplete) {
-                error << "Failed to parse " << subname << "\n";
+                running.e << "Failed to parse " << subname << "\n";
                 return res;
               }
               return ParseStatus::ParseComplete;
@@ -428,8 +433,8 @@ namespace argparse {
     {
       running.o << "Usage:";
       WriteUsage(running);
-      error << p.what() << "\n";
-      out << "\n";
+      running.e << p.what() << "\n";
+      running.o << "\n";
       return ParseFailed;
     }
   }

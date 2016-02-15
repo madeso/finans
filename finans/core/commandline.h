@@ -87,10 +87,11 @@ namespace argparse
   struct Running
   {
   public:
-    Running(const std::string& aapp, std::ostream& ao);
+    Running(const std::string& aapp, std::ostream& ao, std::ostream& ae);
 
     const std::string& app;
     std::ostream& o;
+    std::ostream& e;
   private:
     Running(const Running&);
     void operator=(const Running&);
@@ -363,6 +364,8 @@ namespace argparse
     virtual void WriteUsage(Running& r) const;
   private:
     typedef std::shared_ptr<Argument> ArgumentPtr;
+
+    ParseStatus DoParseArgs(Arguments& arguments, Running& running) const;
 
     Parser& AddArgument(const std::string& name, ArgumentPtr arg, const Extra& extra);
 
