@@ -426,6 +426,7 @@ namespace argparse {
     }
     catch (ParserError& p)
     {
+      running.o << "Usage:";
       WriteUsage(running);
       error << p.what() << "\n";
       out << "\n";
@@ -435,6 +436,7 @@ namespace argparse {
 
   void Parser::WriteHelp(Running& r) const
   {
+    r.o << "Usage:";
     WriteUsage(r);
     r.o << std::endl << description_ << std::endl << std::endl;
 
@@ -466,7 +468,6 @@ namespace argparse {
 
   void Parser::WriteUsage(Running& r) const
   {
-    r.o << "Usage:";
     for (const Help& optional : helpOptional_)
     {
       r.o << " " << optional.GetUsage();
