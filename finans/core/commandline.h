@@ -380,6 +380,7 @@ namespace argparse
     mutable size_t positionalIndex_; // todo: mutable or change parseArgs to nonconst?
 
     StringConverter<SubParser*> sub_parsers_;
+    mutable std::string sub_parser_used_;  // todo: mutable or change parseArgs to nonconst?
 
     std::vector<Help> helpOptional_;
     std::vector<Help> helpPositional_;

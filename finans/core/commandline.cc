@@ -402,6 +402,7 @@ namespace argparse {
             else {
               std::string subname;
               SubParser* sub = sub_parsers_.Convert(args[0], &subname);
+              sub_parser_used_ = subname;
               ParserChild parser(args[0], this);
               sub->AddParser(parser);
               consumed = true;
@@ -479,17 +480,23 @@ namespace argparse {
     }
 
     if (false == sub_parsers_.empty()) {
-      const auto sp = sub_parsers_.names();
-      r.o << " {";
-      bool first = true;
-      for (const auto& p : sp) {
-        if (first == false) {
-          r.o << "|";
-        }
-        first = false;
-        r.o << p;
+      // if the sub-parser is set, use it instead of the array
+      if (false == sub_parser_used_.empty()) {
+        r.o << " " << sub_parser_used_;
       }
-      r.o << "}";
+      else {
+        const auto sp = sub_parsers_.names();
+        r.o << " {";
+        bool first = true;
+        for (const auto& p : sp) {
+          if (first == false) {
+            r.o << "|";
+          }
+          first = false;
+          r.o << p;
+        }
+        r.o << "}";
+      }
     }
 
     for (const Help& positional : helpPositional_)
