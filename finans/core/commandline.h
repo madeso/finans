@@ -360,7 +360,7 @@ namespace argparse
 
 
     void WriteHelp(Running& r) const;
-    void WriteUsage(Running& r) const;
+    virtual void WriteUsage(Running& r) const;
   private:
     typedef std::shared_ptr<Argument> ArgumentPtr;
 

@@ -320,6 +320,19 @@ namespace argparse {
     Parser* parser;
   };
 
+  class ParserChild : public Parser {
+  public:
+    ParserChild(const std::string& desc, const Parser* parent) : Parser(desc), parent_(parent) {}
+
+    void WriteUsage(Running& r) const override {
+      parent_->WriteUsage(r);
+      Parser::WriteUsage(r);
+    }
+
+  private:
+    const Parser* parent_;
+  };
+
   Parser::Parser(const std::string& d, const std::string aappname)
     : positionalIndex_(0)
     , description_(d)
@@ -384,7 +397,7 @@ namespace argparse {
             else {
               std::string subname;
               SubParser* sub = sub_parsers_.Convert(args[0], &subname);
-              Parser parser(args[0]);
+              ParserChild parser(args[0], this);
               sub->AddParser(parser);
               consumed = true;
               args.ConsumeOne("SUBCOMMAND");
