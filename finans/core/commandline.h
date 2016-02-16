@@ -24,6 +24,8 @@ namespace argparse
   {
   public:
     ParserError(const std::string& error);
+
+    bool has_displayed_usage;
   };
 
   class Arguments

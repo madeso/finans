@@ -8,8 +8,16 @@
 namespace argparse {
 
   ParserError::ParserError(const std::string& error)
-    : runtime_error("error: " + error)
+    : runtime_error("error: " + error), has_displayed_usage(false)
   {
+  }
+
+  void OnParserError(Running& running, const Parser* parser, ParserError& p) {
+    if( p.has_displayed_usage == false ) {
+      running.o << "Usage:";
+      parser->WriteUsage(running);
+      p.has_displayed_usage = true;
+    }
   }
 
 
@@ -359,7 +367,15 @@ namespace argparse {
     Arguments args = arguments;
     Running running(arguments.name(), out, error);
 
-    return DoParseArgs(args, running);
+    try {
+      return DoParseArgs(args, running);
+    }
+    catch (ParserError& p) {
+      OnParserError(running, this, p);
+      running.e << p.what() << "\n";
+      running.o << "\n";
+      return Parser::ParseStatus::ParseFailed;
+    }
   }
 
   Parser::ParseStatus Parser::DoParseArgs(Arguments& args, Running& running) const {
@@ -407,12 +423,14 @@ namespace argparse {
               sub->AddParser(parser);
               consumed = true;
               args.ConsumeOne("SUBCOMMAND");
-              auto res = parser.DoParseArgs(args, running);
-              if (res != ParseStatus::ParseComplete) {
-                running.e << "Failed to parse " << subname << "\n";
-                return res;
+              try {
+                return parser.DoParseArgs(args, running);
               }
-              return ParseStatus::ParseComplete;
+              catch (ParserError& p) {
+                OnParserError(running, &parser, p);
+                running.e << "error: Failed to parse " << subname << ":\n";
+                throw;
+              }
             }
           }
           if (consumed == false) {
@@ -432,11 +450,8 @@ namespace argparse {
     }
     catch (ParserError& p)
     {
-      running.o << "Usage:";
-      WriteUsage(running);
-      running.e << p.what() << "\n";
-      running.o << "\n";
-      return ParseFailed;
+      OnParserError(running, this, p);
+      throw;
     }
   }
 
