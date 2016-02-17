@@ -117,7 +117,7 @@ GTEST(TestPositionalValueErr) {
 
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: too few arguments.\n", error.str());
-  EXPECT_EQ("Usage: [-h] [op]\n", output.str());
+  EXPECT_EQ("Usage: [-h] op\n", output.str());
   EXPECT_EQ(42, op); // not touched
 }
 
@@ -208,7 +208,7 @@ GTEST(TestSpecifyTwice) {
   
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: All positional arguments have been consumed: -i\n", error.str());
-  EXPECT_EQ("Usage: [-h] [-int,-i [int]]\n", output.str());
+  EXPECT_EQ("Usage: [-h] [-int,-i int]\n", output.str());
   EXPECT_EQ(42, op);
 }
 
@@ -318,7 +318,7 @@ GTEST(TestCallingSubParserWithBadArguments) {
     sub.ParseArgs(argparse::Arguments("app.exe", { "on", "cat" }), output, error);
   
   EXPECT_EQ(false, ok);
-  EXPECT_EQ("Usage: [-h] ONE [-h] [-name [name]]\n", output.str());
+  EXPECT_EQ("Usage: [-h] ONE [-h] [-name name]\n", output.str());
   EXPECT_EQ("error: Failed to parse ONE:\nerror: All positional arguments have been consumed: cat\n", error.str());
   EXPECT_EQ("", sp1.name);
   EXPECT_EQ("", sp2.name);
@@ -356,3 +356,5 @@ GTEST(TestCallingHelpBasicCustomName) {
   EXPECT_EQ("Usage: awesome.exe [-h]\nDescription of app.\n\nOptional arguments:\n  -h\tShow this help message and exit.\n\n", output.str());
   EXPECT_EQ("", error.str());
 }
+
+
