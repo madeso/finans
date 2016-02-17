@@ -357,4 +357,20 @@ GTEST(TestCallingHelpBasicCustomName) {
   EXPECT_EQ("", error.str());
 }
 
+GTEST(TestCallingHelpOp) {
+  argparse::Parser parser("Description of app.");
+  std::string op = "";
+  std::string ap = "";
+  parser.AddOption("-op", op);
+  parser.AddOption("-ap", ap);
+  const bool ok = argparse::Parser::ParseQuit ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "-h" }), output, error);
 
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("Usage: app.exe [-h] [-op op] [-ap ap]\nDescription of app.\n\nOptional arguments:\n"
+    "  -ap ap\n"
+    "  -h\tShow this help message and exit.\n"
+    "  -op op\n"
+    "\n", output.str());
+  EXPECT_EQ("", error.str());
+}
