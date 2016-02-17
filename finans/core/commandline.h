@@ -91,7 +91,7 @@ namespace argparse
   public:
     Running(const std::string& aapp, std::ostream& ao, std::ostream& ae);
 
-    const std::string& app;
+    const std::string app;
     std::ostream& o;
     std::ostream& e;
     bool quit;

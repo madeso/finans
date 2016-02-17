@@ -300,7 +300,13 @@ namespace argparse {
   {
     if (IsOptional(name_))
     {
-      return name_ + " " + GetMetavarReprestentation();
+      const auto meta = GetMetavarReprestentation();
+      if (meta.empty()) {
+        return name_;
+      }
+      else {
+        return name_ + " " + meta;
+      }
     }
     else
     {
@@ -350,7 +356,7 @@ namespace argparse {
     , sub_parsers_("subparser")
   {
     std::shared_ptr<Argument> arg(new CallHelp(this));
-    AddArgument("-h", arg, Extra().count(Count(Count::None)).help("show this help message and exit"));
+    AddArgument("-h", arg, Extra().count(Count(Count::None)).help("Show this help message and exit."));
   }
 
   Parser::ParseStatus Parser::ParseArgs(int argc, char* argv[], std::ostream& out, std::ostream& error) const
@@ -459,6 +465,7 @@ namespace argparse {
   void Parser::WriteHelp(Running& r) const
   {
     r.o << "Usage:";
+    r.o << " " << (appname_.empty() ? r.app : appname_);
     WriteUsage(r);
     r.o << std::endl << description_ << std::endl << std::endl;
 
@@ -467,10 +474,15 @@ namespace argparse {
 
     if (helpPositional_.empty() == false)
     {
-      r.o << "Positional arguments: " << std::endl;
+      r.o << "Positional arguments:" << std::endl;
       for (const Help& positional : helpPositional_)
       {
-        r.o << ins << positional.GetHelpCommand() << sep << positional.help() << std::endl;
+        r.o << ins << positional.GetHelpCommand();
+        const auto h = positional.help();
+        if (h.empty() == false) {
+          r.o << sep << h;
+        }
+        r.o << std::endl;
       }
 
       r.o << std::endl;
@@ -478,10 +490,15 @@ namespace argparse {
 
     if (helpOptional_.empty() == false)
     {
-      r.o << "Optional arguments: " << std::endl;
+      r.o << "Optional arguments:" << std::endl;
       for (const Help& optional : helpOptional_)
       {
-        r.o << ins << optional.GetHelpCommand() << sep << optional.help() << std::endl;
+        r.o << ins << optional.GetHelpCommand();
+        const auto h = optional.help();
+        if( h.empty() == false) {
+          r.o << sep << h;
+        }
+        r.o << std::endl;
       }
     }
 
