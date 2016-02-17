@@ -347,3 +347,12 @@ GTEST(TestCallingHelpBasic) {
   EXPECT_EQ("", error.str());
 }
 
+GTEST(TestCallingHelpBasicCustomName) {
+  argparse::Parser parser("Description of app.", "awesome.exe");
+  const bool ok = argparse::Parser::ParseQuit ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "-h" }), output, error);
+
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("Usage: awesome.exe [-h]\nDescription of app.\n\nOptional arguments:\n  -h\tShow this help message and exit.\n\n", output.str());
+  EXPECT_EQ("", error.str());
+}
