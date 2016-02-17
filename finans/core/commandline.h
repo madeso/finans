@@ -94,6 +94,7 @@ namespace argparse
     const std::string& app;
     std::ostream& o;
     std::ostream& e;
+    bool quit;
   private:
     Running(const Running&);
     void operator=(const Running&);
@@ -314,6 +315,7 @@ namespace argparse
     enum ParseStatus
     {
       ParseFailed,
+      ParseQuit,
       ParseComplete
     };
 

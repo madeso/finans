@@ -83,6 +83,7 @@ namespace argparse {
     : app(aapp)
     , o(ao)
     , e(ae)
+    , quit(false)
   {
   }
 
@@ -323,7 +324,7 @@ namespace argparse {
     void OnArgument(Running& r, const std::string& argname) override
     {
       parser->WriteHelp(r);
-      exit(0);
+      r.quit = true;
     }
 
     Parser* parser;
@@ -402,6 +403,7 @@ namespace argparse {
               args.ConsumeOne(); // the optional command = arg[0}
               r->second->ConsumeArguments(running, args, arg);
               r->second->set_has_been_parsed(true);
+              if (running.quit) return ParseStatus::ParseQuit;
             }
           }
         }
