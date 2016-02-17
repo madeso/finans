@@ -259,7 +259,6 @@ namespace argparse {
     case Count::Const:
     {
       std::ostringstream ss;
-      ss << "[";
       for (size_t i = 0; i < countcount_; ++i)
       {
         if (i != 0)
@@ -268,7 +267,6 @@ namespace argparse {
         }
         ss << GetMetavarName();
       }
-      ss << "]";
       return ss.str();
     }
     default:
