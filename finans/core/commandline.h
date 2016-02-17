@@ -320,24 +320,24 @@ namespace argparse
     explicit Parser(const std::string& d, const std::string aappname = "");
 
     template<typename T>
-    Parser& operator()(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
+    void AddOption(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
     {
-      return Add<T, T>(name, var, extra, combiner);
+      Add<T, T>(name, var, extra, combiner);
     }
 
     template<typename T>
-    Parser& AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
-      return Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
+    void AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
+      Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     template<typename T>
-    Parser& AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      return Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar).several(), argparse::PushBackVector<T>);
+    void AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
+      Add<std::vector<T>, T>(name, strings, argparse::Extra().count(Count(1)).metavar(metavar).several(), argparse::PushBackVector<T>);
     }
 
     template<typename T>
-    Parser& operator()(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      return AddVector<T>(name, strings, metavar);
+    void AddOption(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
+      AddVector<T>(name, strings, metavar);
     }
 
     template<typename T, typename V>
@@ -348,15 +348,15 @@ namespace argparse
     }
 
     template<typename T>
-    Parser& StoreConst(const std::string& name, T& var, const T& value, const Extra& e = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>)
+    void StoreConst(const std::string& name, T& var, const T& value, const Extra& e = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>)
     {
       auto extra = e;
       extra.count(Count(Count::None));
       ArgumentPtr arg(new ArgumentStoreConst<T>(var, value, combiner));
-      return AddArgument(name, arg, extra);
+      AddArgument(name, arg, extra);
     }
 
-    Parser& AddSubParser(const std::string& name, SubParser* parser);
+    void AddSubParser(const std::string& name, SubParser* parser);
 
     ParseStatus ParseArgs(int argc, char* argv[], std::ostream& out = std::cout, std::ostream& error = std::cerr) const;
     ParseStatus ParseArgs(const Arguments& arguments, std::ostream& out = std::cout, std::ostream& error = std::cerr) const;

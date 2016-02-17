@@ -358,9 +358,8 @@ namespace argparse {
     return ParseArgs(args, out, error);
   }
 
-  Parser& Parser::AddSubParser(const std::string& name, SubParser* parser) {
+  void Parser::AddSubParser(const std::string& name, SubParser* parser) {
     sub_parsers_(name, parser);
-    return *this;
   }
 
   Parser::ParseStatus Parser::ParseArgs(const Arguments& arguments, std::ostream& out, std::ostream& error) const {

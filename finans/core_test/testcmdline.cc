@@ -13,7 +13,7 @@ public:
   }
 
   void AddParser(argparse::Parser& parser) override {
-    parser("-name", name);
+    parser.AddOption("-name", name);
   }
 
   void ParseCompleted() override {
@@ -35,17 +35,18 @@ struct CommandlineTest : public Test {
   argparse::Parser sub;
 
   CommandlineTest() : parser("description"), sub("description") {
-    parser("pos", animal)("-op", another);
-    sub.AddSubParser("one", &sp1).AddSubParser("two", &sp2);
+    parser.AddOption("pos", animal);
+    parser.AddOption("-op", another);
+    sub.AddSubParser("one", &sp1);
+    sub.AddSubParser("two", &sp2);
   }
 };
 
 #define GTEST(x) TEST_F(CommandlineTest, x)
 
 GTEST(TestEmpty) {
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    .ParseArgs(argparse::Arguments("app.exe", {}), output, error);
+  argparse::Parser parser("description");
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", {}), output, error);
   EXPECT_EQ(true, ok);
 
   EXPECT_EQ("", error.str());
@@ -53,9 +54,10 @@ GTEST(TestEmpty) {
 }
 
 GTEST(TestError) {
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    .ParseArgs(argparse::Arguments("app.exe", { "hello", "world" }), output, error);
+
+  argparse::Parser parser("description");
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "hello", "world" }), output, error);
+
   EXPECT_EQ(false, ok);
   EXPECT_EQ("Usage: [-h]\n", output.str());
   EXPECT_EQ("error: All positional arguments have been consumed: hello\n", error.str());
@@ -63,10 +65,11 @@ GTEST(TestError) {
 
 GTEST(TestOptionalDefault) {
   int op = 2;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("-op", op)
-    .ParseArgs(argparse::Arguments("app.exe", {}), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("-op", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", {}), output, error);
+
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -75,10 +78,11 @@ GTEST(TestOptionalDefault) {
 
 GTEST(TestOptionalValue) {
   int op = 2;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("-op", op)
-    .ParseArgs(argparse::Arguments("app.exe", {"-op", "42"}), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("-op", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-op", "42" }), output, error);
+
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -87,10 +91,11 @@ GTEST(TestOptionalValue) {
 
 GTEST(TestPositionalValue) {
   int op = 2;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("op", op)
-    .ParseArgs(argparse::Arguments("app.exe", { "42" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("op", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "42" }), output, error);
+
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -99,10 +104,11 @@ GTEST(TestPositionalValue) {
 
 GTEST(TestPositionalValueErr) {
   int op = 42;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("op", op)
-    .ParseArgs(argparse::Arguments("app.exe", {}), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("op", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", {}), output, error);
+
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: too few arguments.\n", error.str());
   EXPECT_EQ("Usage: [-h] [op]\n", output.str());
@@ -111,10 +117,11 @@ GTEST(TestPositionalValueErr) {
 
 GTEST(TestStdVector) {
   std::vector<std::string> strings;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    .AddGreedy("-strings", strings, "string")
-    .ParseArgs(argparse::Arguments("app.exe", {"-strings", "cat", "dog", "fish"}), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddGreedy("-strings", strings, "string");
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-strings", "cat", "dog", "fish" }), output, error);
+
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -123,10 +130,11 @@ GTEST(TestStdVector) {
 
 GTEST(TestStdVectorInts) {
   std::vector<int> ints;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    .AddGreedy("-ints", ints, "string")
-    .ParseArgs(argparse::Arguments("app.exe", { "-ints", "2", "3", "-5", "4" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddGreedy("-ints", ints, "string");
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-ints", "2", "3", "-5", "4" }), output, error);
+
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -135,10 +143,11 @@ GTEST(TestStdVectorInts) {
 
 GTEST(TestNonGreedyVector) {
   std::vector<std::string> strings;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("-s", strings)
-    .ParseArgs(argparse::Arguments("app.exe", { "-s", "cat", "-s", "dog", "-s", "fish" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("-s", strings);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-s", "cat", "-s", "dog", "-s", "fish" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -150,14 +159,15 @@ enum class Day
   TODAY, YESTERDAY, TOMORROW
 };
 
-ARGPARSE_DEFINE_ENUM(Day, "day", ("Today", Day::TODAY)("Tomorrow", Day::TOMORROW)("Yesterday", Day::YESTERDAY) )
+ARGPARSE_DEFINE_ENUM(Day, "day", ("Today", Day::TODAY)("Tomorrow", Day::TOMORROW)("Yesterday", Day::YESTERDAY))
 
 GTEST(TestEnum) {
   Day op = Day::TOMORROW;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("op", op)
-    .ParseArgs(argparse::Arguments("app.exe", { "tod" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("op", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "tod" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -166,10 +176,11 @@ GTEST(TestEnum) {
 
 GTEST(TestCommaOp) {
   int op = 2;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("-int,-i", op)
-    .ParseArgs(argparse::Arguments("app.exe", { "-int", "42" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("-int,-i", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-int", "42" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -178,10 +189,11 @@ GTEST(TestCommaOp) {
 
 GTEST(TestSpecifyTwice) {
   int op = 2;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    ("-int,-i", op)
-    .ParseArgs(argparse::Arguments("app.exe", { "-int", "42", "-i", "50" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.AddOption("-int,-i", op);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-int", "42", "-i", "50" }), output, error);
+  
   EXPECT_EQ(false, ok);
   EXPECT_EQ("error: All positional arguments have been consumed: -i\n", error.str());
   EXPECT_EQ("Usage: [-h] [-int,-i [int]]\n", output.str());
@@ -189,8 +201,8 @@ GTEST(TestSpecifyTwice) {
 }
 
 GTEST(TestPrecedencePos) {
-  const bool ok = argparse::Parser::ParseComplete ==
-    parser.ParseArgs(argparse::Arguments("app.exe", {"dog"}), output, error);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "dog" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -201,6 +213,7 @@ GTEST(TestPrecedencePos) {
 GTEST(TestPrecedencePosOp) {
   const bool ok = argparse::Parser::ParseComplete ==
     parser.ParseArgs(argparse::Arguments("app.exe", { "-dog", "-op", "cat" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
@@ -211,6 +224,7 @@ GTEST(TestPrecedencePosOp) {
 GTEST(TestPrecedenceOpPos) {
   const bool ok = argparse::Parser::ParseComplete ==
     parser.ParseArgs(argparse::Arguments("app.exe", { "-op", "cat", "dog" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", error.str());
   EXPECT_EQ("", output.str());
@@ -220,10 +234,11 @@ GTEST(TestPrecedenceOpPos) {
 
 GTEST(TestStoreConstInt) {
   int op = 12;
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    .StoreConst("-store", op, 42)
-    .ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.StoreConst("-store", op, 42);
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
@@ -232,10 +247,11 @@ GTEST(TestStoreConstInt) {
 
 GTEST(TestStoreConstString) {
   std::string op = "";
-  const bool ok = argparse::Parser::ParseComplete ==
-    argparse::Parser("description")
-    .StoreConst<std::string>("-store", op, "dog")
-    .ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
+
+  argparse::Parser parser("description");
+  parser.StoreConst<std::string>("-store", op, "dog");
+  const bool ok = argparse::Parser::ParseComplete == parser.ParseArgs(argparse::Arguments("app.exe", { "-store" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
@@ -246,6 +262,7 @@ GTEST(TestStoreConstString) {
 GTEST(TestSubParserBasic) {
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "one", "-name", "dog" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
@@ -255,9 +272,10 @@ GTEST(TestSubParserBasic) {
 
 GTEST(TestSubParserOptional) {
   std::string op = "";
-  sub("-op", op);
+  sub.AddOption("-op", op);
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "-op", "cat", "on", "-name", "dog" }), output, error);
+ 
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
@@ -268,9 +286,10 @@ GTEST(TestSubParserOptional) {
 
 GTEST(TestSubParserPositional) {
   std::string op = "";
-  sub("op", op);
+  sub.AddOption("op", op);
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "cat", "on", "-name", "dog" }), output, error);
+  
   EXPECT_EQ(true, ok);
   EXPECT_EQ("", output.str());
   EXPECT_EQ("", error.str());
@@ -282,6 +301,7 @@ GTEST(TestSubParserPositional) {
 GTEST(TestCallingSubParserWithBadArguments) {
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "on", "cat" }), output, error);
+  
   EXPECT_EQ(false, ok);
   EXPECT_EQ("Usage: [-h] ONE [-h] [-name [name]]\n", output.str());
   EXPECT_EQ("error: Failed to parse ONE:\nerror: All positional arguments have been consumed: cat\n", error.str());
@@ -292,6 +312,7 @@ GTEST(TestCallingSubParserWithBadArguments) {
 GTEST(TestCallingInvalidSubParser) {
   const bool ok = argparse::Parser::ParseComplete ==
     sub.ParseArgs(argparse::Arguments("app.exe", { "dog", "cat" }), output, error);
+  
   EXPECT_EQ(false, ok);
   EXPECT_EQ("Usage: [-h] {ONE|TWO}\n", output.str());
   EXPECT_EQ("error: Unable to match DOG as a subparser.\n", error.str());
