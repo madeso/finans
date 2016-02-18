@@ -4,6 +4,8 @@
 
 #include <cassert>
 #include <algorithm>
+#include <string>
+#include <set>
 
 namespace argparse {
 
@@ -489,14 +491,19 @@ namespace argparse {
     if (helpOptional_.empty() == false)
     {
       r.o << "Optional arguments:" << std::endl;
+      std::set<std::string> opts;
       for (const Help& optional : helpOptional_)
       {
-        r.o << ins << optional.GetHelpCommand();
+        std::ostringstream ss;
+        ss << ins << optional.GetHelpCommand();
         const auto h = optional.help();
         if( h.empty() == false) {
-          r.o << sep << h;
+          ss << sep << h;
         }
-        r.o << std::endl;
+        opts.insert(ss.str());
+      }
+      for (const auto& s : opts) {
+        r.o << s << "\n";
       }
     }
 
