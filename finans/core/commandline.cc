@@ -551,23 +551,36 @@ namespace argparse {
     }
     const auto names = Tokenize(commands, ",", true);
     std::string thename = "";
+    int optionalcount = 0;
+    int positionalcount = 0;
     for(const auto name: names) {
       if (IsOptional(name))
       {
         optionals_.insert(Optionals::value_type(name, arg));
         if (thename.empty()) thename = name.substr(1);
+        ++optionalcount;
       }
       else
       {
         positionals_.push_back(arg);
         if( thename.empty() ) thename = name;
+        ++positionalcount;
       }
     }
     Extra e = extra;
     if (e.metavar().empty()) {
       e.metavar(thename);
     }
-    helpOptional_.push_back(Help(commands, e));
+    if (positionalcount > 0 && optionalcount > 0) {
+      assert(false && "Optional and positional in argumentlist is not supported.");
+    }
+    if( positionalcount > 0 ) {
+      helpPositional_.push_back(Help(commands, e));
+    }
+    else {
+      assert(optionalcount > 0);
+      helpOptional_.push_back(Help(commands, e));
+    }
     return *this;
   }
 }
