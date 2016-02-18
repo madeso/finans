@@ -343,7 +343,12 @@ GTEST(TestCallingHelpBasic) {
     parser.ParseArgs(argparse::Arguments("app.exe", { "-h" }), output, error);
 
   EXPECT_EQ(true, ok);
-  EXPECT_EQ("Usage: app.exe [-h]\nDescription of app.\n\nOptional arguments:\n  -h\tShow this help message and exit.\n\n", output.str());
+  EXPECT_EQ("Usage: app.exe [-h]\n"
+    "Description of app.\n"
+    "\n"
+    "Optional arguments:\n"
+    "  -h\tShow this help message and exit.\n"
+    "\n", output.str());
   EXPECT_EQ("", error.str());
 }
 
@@ -353,11 +358,16 @@ GTEST(TestCallingHelpBasicCustomName) {
     parser.ParseArgs(argparse::Arguments("app.exe", { "-h" }), output, error);
 
   EXPECT_EQ(true, ok);
-  EXPECT_EQ("Usage: awesome.exe [-h]\nDescription of app.\n\nOptional arguments:\n  -h\tShow this help message and exit.\n\n", output.str());
+  EXPECT_EQ("Usage: awesome.exe [-h]\n"
+    "Description of app.\n"
+    "\n"
+    "Optional arguments:\n"
+    "  -h\tShow this help message and exit.\n"
+    "\n", output.str());
   EXPECT_EQ("", error.str());
 }
 
-GTEST(TestCallingHelpOp) {
+GTEST(TestCallingHelpOpOptional) {
   argparse::Parser parser("Description of app.");
   std::string op = "";
   std::string ap = "";
@@ -367,10 +377,36 @@ GTEST(TestCallingHelpOp) {
     parser.ParseArgs(argparse::Arguments("app.exe", { "-h" }), output, error);
 
   EXPECT_EQ(true, ok);
-  EXPECT_EQ("Usage: app.exe [-h] [-op op] [-ap ap]\nDescription of app.\n\nOptional arguments:\n"
+  EXPECT_EQ("Usage: app.exe [-h] [-op op] [-ap ap]\n"
+    "Description of app.\n"
+    "\n"
+    "Optional arguments:\n"
     "  -ap ap\n"
     "  -h\tShow this help message and exit.\n"
     "  -op op\n"
+    "\n", output.str());
+  EXPECT_EQ("", error.str());
+}
+
+GTEST(TestCallingHelpOpPositional) {
+  argparse::Parser parser("Description of app.");
+  std::string op = "";
+  std::string ap = "";
+  parser.AddOption("op", op);
+  parser.AddOption("ap", ap);
+  const bool ok = argparse::Parser::ParseQuit ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "-h" }), output, error);
+
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("Usage: app.exe [-h] op ap\n"
+    "Description of app.\n"
+    "\n"
+    "Positional arguments:\n"
+    "  op\n"
+    "  ap\n"
+    "\n"
+    "Optional arguments:\n"
+    "  -h\tShow this help message and exit.\n"
     "\n", output.str());
   EXPECT_EQ("", error.str());
 }
