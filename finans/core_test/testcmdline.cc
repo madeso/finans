@@ -335,6 +335,48 @@ GTEST(TestCallingInvalidSubParser) {
   EXPECT_EQ("", sp2.name);
 }
 
+class VerifySubParserIsCalledParser : public argparse::SubParser {
+public:
+  int dummy_arg;
+  int pc_callcount;
+  VerifySubParserIsCalledParser() : pc_callcount(0) {
+  }
+  virtual void AddParser(argparse::Parser& parser) override {
+    parser.AddOption("-dummy", dummy_arg);
+  }
+
+  // called when parsing is done
+  virtual void ParseCompleted() override {
+    ++pc_callcount;
+  }
+};
+
+GTEST(VerifySubParserIsCalledWithoutArg) {
+  argparse::Parser parser("Description of app.");
+  VerifySubParserIsCalledParser dog;
+  parser.AddSubParser("dog", &dog);
+  const bool ok = argparse::Parser::ParseComplete ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "dog" }), output, error);
+
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
+  EXPECT_EQ("", error.str());
+  EXPECT_EQ(1, dog.pc_callcount);
+}
+
+GTEST(VerifySubParserIsCalledWithArg) {
+  argparse::Parser parser("Description of app.");
+  VerifySubParserIsCalledParser dog;
+  parser.AddSubParser("dog", &dog);
+  const bool ok = argparse::Parser::ParseComplete ==
+    parser.ParseArgs(argparse::Arguments("app.exe", { "dog", "-dummy", "3"}), output, error);
+
+  EXPECT_EQ(true, ok);
+  EXPECT_EQ("", output.str());
+  EXPECT_EQ("", error.str());
+  EXPECT_EQ(1, dog.pc_callcount);
+}
+
 // todo: test help string when calling -h
 
 GTEST(TestCallingHelpBasic) {
