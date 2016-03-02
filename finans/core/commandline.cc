@@ -431,7 +431,11 @@ namespace argparse {
               consumed = true;
               args.ConsumeOne("SUBCOMMAND");
               try {
-                return parser.DoParseArgs(args, running);
+                auto parsestatus = parser.DoParseArgs(args, running);
+                if (parsestatus == ParseComplete) {
+                  sub->ParseCompleted();
+                }
+                return parsestatus;
               }
               catch (ParserError& p) {
                 OnParserError(running, &parser, p);
