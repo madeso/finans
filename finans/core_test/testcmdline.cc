@@ -410,3 +410,6 @@ GTEST(TestCallingHelpOpPositional) {
     "\n", output.str());
   EXPECT_EQ("", error.str());
 }
+
+// test commandline examples
+// test commandline detailed help
