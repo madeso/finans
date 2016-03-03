@@ -53,7 +53,6 @@ class cmd_status : public argparse::SubParser {
 };
 
 class cmd_addcurrecy : public argparse::SubParser {
-  
   std::string longNamneArg;
   std::string shortNameArg;
   std::string beforeArg;
@@ -82,25 +81,25 @@ class cmd_addcurrecy : public argparse::SubParser {
 };
 
 class cmd_addaccount : public argparse::SubParser {
-  std::string longNamneArg;
-  std::string shortNameArg;
-  std::string currencyArg;
+  std::string long_name_;
+  std::string short_name_;
+  std::string currency_name_;
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a account to finans");
-    parser.AddOption("name",      longNamneArg); // "The name, ie. 'My card'"
-    parser.AddOption("short-name",shortNameArg); // "The short name ie. Visa"
-    parser.AddOption("currency",  currencyArg ); // "The default currency for this account"
+    parser.AddOption("name",      long_name_); // "The name, ie. 'My card'"
+    parser.AddOption("short-name",short_name_); // "The short name ie. Visa"
+    parser.AddOption("currency",  currency_name_ ); // "The default currency for this account"
   }
 
   void ParseCompleted() override {
     try {
       auto finans = Finans::CreateNew();
-      auto currency = finans->GetCurrencyByName(currencyArg);
+      auto currency = finans->GetCurrencyByName(currency_name_);
       if (currency == -1) throw "Unknown currency";
-      finans->AddAccount(longNamneArg, shortNameArg, currency);
+      finans->AddAccount(long_name_, short_name_, currency);
       finans->Save();
-      std::cout << "Added " << shortNameArg << ".\n";
+      std::cout << "Added " << short_name_ << ".\n";
     }
     catch (...)
     {
@@ -110,23 +109,23 @@ class cmd_addaccount : public argparse::SubParser {
 };
 
 class cmd_addcompany : public argparse::SubParser {
-  std::string nameArg;
-  std::string currencyArg;
+  std::string company_name_;
+  std::string currency_name_;
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a company to finans");
-    parser.AddOption("name", nameArg); // "The name, ie. 'Acme'"
-    parser.AddOption("currency", currencyArg); // "The default currency this company works in"
+    parser.AddOption("name", company_name_); // "The name, ie. 'Acme'"
+    parser.AddOption("currency", currency_name_); // "The default currency this company works in"
   }
 
   void ParseCompleted() override {
     try {
       auto finans = Finans::CreateNew();
-      auto currency = finans->GetCurrencyByName(currencyArg);
+      auto currency = finans->GetCurrencyByName(currency_name_);
       if (currency == -1) throw "Unknown currency";
-      finans->AddCompany(nameArg, currency);
+      finans->AddCompany(company_name_, currency);
       finans->Save();
-      std::cout << "Added " << nameArg << ".\n";
+      std::cout << "Added " << company_name_ << ".\n";
     }
     catch (...)
     {
@@ -136,19 +135,19 @@ class cmd_addcompany : public argparse::SubParser {
 };
 
 class cmd_addcategory : public argparse::SubParser {
-  std::string nameArg;
+  std::string category_name_;
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a category/envelope to finans");
-    parser.AddOption("name", nameArg); // "The name, ie. 'Savings'"
+    parser.AddOption("name", category_name_); // "The name, ie. 'Savings'"
   }
 
   void ParseCompleted() override {
     try {
       auto finans = Finans::CreateNew();
-      finans->AddCategory(nameArg);
+      finans->AddCategory(category_name_);
       finans->Save();
-      std::cout << "Added " << nameArg << ".\n";
+      std::cout << "Added " << category_name_ << ".\n";
     }
     catch (...)
     {
@@ -158,24 +157,21 @@ class cmd_addcategory : public argparse::SubParser {
 };
 
 class cmd_install : public argparse::SubParser {
-  std::string folderArg;
-  bool dontCreateSwitch;
+  std::string folder_;
+  bool dont_create_;
 
 public:
-  cmd_install() : dontCreateSwitch(true) { }
+  cmd_install() : dont_create_(true) { }
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Install finans to your system");
-    parser.AddOption("folder", folderArg); // "Where to install"
-    parser.StoreConst("dont-create", dontCreateSwitch, false);
+    parser.AddOption("folder", folder_); // "Where to install"
+    parser.StoreConst("dont-create", dont_create_, false);
   }
 
   void ParseCompleted() override {
     try {
-      const std::string folder = folderArg;
-      const bool dontCreate = dontCreateSwitch;
-
-      Finans::Install(folder, !dontCreate);
+      Finans::Install(folder_, !dont_create_);
       std::cout << "Install complete.\n";
     }
     catch (...)
