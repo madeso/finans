@@ -60,10 +60,10 @@ class cmd_addcurrecy : public argparse::SubParser {
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a currency to finans");
-    parser.AddOption("name",       longNamneArg); //"The long name, ie. 'American Dollar'"
-    parser.AddOption("short-name", shortNameArg); //"The short name ie. USD"
-    parser.AddOption("before",     beforeArg   ); //"The string before a value, ie. the $ in $99"
-    parser.AddOption("after",      afterArg    ); //"The string after a value, ie. the kr in 45 kr"
+    parser.AddOption("name",       longNamneArg).help("The long name, ie. 'American Dollar'");
+    parser.AddOption("short-name", shortNameArg).help("The short name ie. USD");
+    parser.AddOption("before",     beforeArg   ).help("The string before a value, ie. the $ in $99");
+    parser.AddOption("after",      afterArg    ).help("The string after a value, ie. the kr in 45 kr");
   }
 
   void ParseCompleted() override {
@@ -87,9 +87,9 @@ class cmd_addaccount : public argparse::SubParser {
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a account to finans");
-    parser.AddOption("name",      long_name_); // "The name, ie. 'My card'"
-    parser.AddOption("short-name",short_name_); // "The short name ie. Visa"
-    parser.AddOption("currency",  currency_name_ ); // "The default currency for this account"
+    parser.AddOption("name",      long_name_).help( "The name, ie. 'My card'");
+    parser.AddOption("short-name",short_name_).help( "The short name ie. Visa");
+    parser.AddOption("currency",  currency_name_ ).help( "The default currency for this account");
   }
 
   void ParseCompleted() override {
@@ -114,8 +114,8 @@ class cmd_addcompany : public argparse::SubParser {
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a company to finans");
-    parser.AddOption("name", company_name_); // "The name, ie. 'Acme'"
-    parser.AddOption("currency", currency_name_); // "The default currency this company works in"
+    parser.AddOption("name", company_name_).help( "The name, ie. 'Acme'");
+    parser.AddOption("currency", currency_name_).help( "The default currency this company works in");
   }
 
   void ParseCompleted() override {
@@ -139,7 +139,7 @@ class cmd_addcategory : public argparse::SubParser {
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Add a category/envelope to finans");
-    parser.AddOption("name", category_name_); // "The name, ie. 'Savings'"
+    parser.AddOption("name", category_name_).help( "The name, ie. 'Savings'");
   }
 
   void ParseCompleted() override {
@@ -165,7 +165,7 @@ public:
 
   void AddParser(argparse::Parser& parser) override {
     parser.set_description("Install finans to your system");
-    parser.AddOption("folder", folder_); // "Where to install"
+    parser.AddOption("folder", folder_).help( "Where to install");
     parser.StoreConst("dont-create", dont_create_, false);
   }
 
