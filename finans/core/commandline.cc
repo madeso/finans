@@ -319,6 +319,32 @@ namespace argparse {
     return help_;
   }
 
+  void Help::SetMetavar(const std::string& metavar) {
+    metavar_ = metavar;
+  }
+
+  void Help::SetHelp(const std::string& help) {
+    help_ = help;
+  }
+
+  NotDefaultArgumentData& NotDefaultArgumentData::metavar(const std::string& metavar) {
+    for (std::shared_ptr<Help> h : helps_) {
+      h->SetMetavar(metavar);
+    }
+    return *this;
+  }
+
+  NotDefaultArgumentData& NotDefaultArgumentData::help(const std::string& help) {
+    for (std::shared_ptr<Help> h : helps_) {
+      h->SetHelp(help);
+    }
+    return *this;
+  }
+
+  void NotDefaultArgumentData::AddHelp(std::shared_ptr<Help> help) {
+    helps_.push_back(help);
+  }
+
   struct CallHelp : public Argument
   {
     CallHelp(Parser* on)
@@ -487,10 +513,10 @@ namespace argparse {
     if (helpPositional_.empty() == false)
     {
       r.o << "Positional arguments:" << std::endl;
-      for (const Help& positional : helpPositional_)
+      for (const std::shared_ptr<Help> positional : helpPositional_)
       {
-        r.o << ins << positional.GetHelpCommand();
-        const auto h = positional.help();
+        r.o << ins << positional->GetHelpCommand();
+        const auto h = positional->help();
         if (h.empty() == false) {
           r.o << sep << h;
         }
@@ -504,11 +530,11 @@ namespace argparse {
     {
       r.o << "Optional arguments:" << std::endl;
       std::set<std::string> opts;
-      for (const Help& optional : helpOptional_)
+      for (const std::shared_ptr<Help> optional : helpOptional_)
       {
         std::ostringstream ss;
-        ss << ins << optional.GetHelpCommand();
-        const auto h = optional.help();
+        ss << ins << optional->GetHelpCommand();
+        const auto h = optional->help();
         if( h.empty() == false) {
           ss << sep << h;
         }
@@ -524,9 +550,9 @@ namespace argparse {
 
   void Parser::WriteUsage(Running& r) const
   {
-    for (const Help& optional : helpOptional_)
+    for (const std::shared_ptr<Help> optional : helpOptional_)
     {
-      r.o << " " << optional.GetUsage();
+      r.o << " " << optional->GetUsage();
     }
 
     if (false == sub_parsers_.empty()) {
@@ -549,15 +575,17 @@ namespace argparse {
       }
     }
 
-    for (const Help& positional : helpPositional_)
+    for (const std::shared_ptr<Help>& positional : helpPositional_)
     {
-      r.o << " " << positional.GetUsage();
+      r.o << " " << positional->GetUsage();
     }
   }
 
 
-  Parser& Parser::AddArgument(const std::string& commands, ArgumentPtr arg, const ParserOptions& extra)
+  NotDefaultArgumentData Parser::AddArgument(const std::string& commands, ArgumentPtr arg, const ParserOptions& extra)
   {
+    NotDefaultArgumentData ret;
+
     if( extra.has_several() ) {
       arg->set_has_several();
     }
@@ -584,15 +612,20 @@ namespace argparse {
       e.metavar(thename);
     }
     if (positionalcount > 0 && optionalcount > 0) {
-      assert(false && "Optional and positional in argumentlist is not supported.");
+      assert(false && "Optional and positional in argument list is not supported.");
     }
     if( positionalcount > 0 ) {
-      helpPositional_.push_back(Help(commands, e));
+      std::shared_ptr<Help> h(new Help(commands, e));
+      ret.AddHelp(h);
+      helpPositional_.push_back(h);
     }
     else {
       assert(optionalcount > 0);
-      helpOptional_.push_back(Help(commands, e));
+      std::shared_ptr<Help> h(new Help(commands, e));
+      ret.AddHelp(h);
+      helpOptional_.push_back(h);
     }
-    return *this;
+
+    return ret;
   }
 }

@@ -210,12 +210,25 @@ namespace argparse
     const std::string GetHelpCommand() const;
 
     const std::string& help() const;
+
+    void SetMetavar(const std::string& metavar);
+    void SetHelp(const std::string& help);
   private:
     std::string name_;
     std::string help_;
     std::string metavar_;
     Count::Type count_;
     size_t countcount_;
+  };
+
+  class NotDefaultArgumentData {
+  public:
+    NotDefaultArgumentData& metavar(const std::string& metavar);
+    NotDefaultArgumentData& help(const std::string& help);
+
+    void AddHelp(std::shared_ptr<Help> help);
+  private:
+    std::vector<std::shared_ptr<Help>> helps_;
   };
 
   template<typename A, typename B>
@@ -325,40 +338,40 @@ namespace argparse
     void set_appname(const std::string& appname);
 
     template<typename T>
-    void AddOption(const std::string& name, T& var, const ParserOptions& extra = ParserOptions(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
+    NotDefaultArgumentData AddOption(const std::string& name, T& var, const ParserOptions& extra = ParserOptions(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
     {
-      Add<T, T>(name, var, extra, combiner);
+      return Add<T, T>(name, var, extra, combiner);
     }
 
     template<typename T>
-    void AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
-      Add<std::vector<T>, T>(name, strings, argparse::ParserOptions().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
+    NotDefaultArgumentData AddGreedy(const std::string& name, std::vector<T>& strings, const std::string& metavar) {
+      return Add<std::vector<T>, T>(name, strings, argparse::ParserOptions().count(Count(argparse::Count::MoreThanOne)).metavar(metavar), argparse::PushBackVector<T>);
     }
 
     template<typename T>
-    void AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      Add<std::vector<T>, T>(name, strings, argparse::ParserOptions().count(Count(1)).metavar(metavar).several(), argparse::PushBackVector<T>);
+    NotDefaultArgumentData AddVector(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
+      return Add<std::vector<T>, T>(name, strings, argparse::ParserOptions().count(Count(1)).metavar(metavar).several(), argparse::PushBackVector<T>);
     }
 
     template<typename T>
-    void AddOption(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
-      AddVector<T>(name, strings, metavar);
+    NotDefaultArgumentData AddOption(const std::string& name, std::vector<T>& strings, const std::string& metavar="") {
+      return AddVector<T>(name, strings, metavar);
     }
 
     template<typename T, typename V>
-    Parser& Add(const std::string& name, T& var, const ParserOptions& extra = ParserOptions(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
+    NotDefaultArgumentData Add(const std::string& name, T& var, const ParserOptions& extra = ParserOptions(), CombinerFunction(T, V) combiner = Assign<T, V>, ConverterFunction(V) co = StandardConverter<V>)
     {
       ArgumentPtr arg(new ArgumentT<T, V>(var, extra.count(), combiner, co));
       return AddArgument(name, arg, extra);
     }
 
     template<typename T>
-    void StoreConst(const std::string& name, T& var, const T& value, const ParserOptions& e = ParserOptions(), CombinerFunction(T, T) combiner = Assign<T, T>)
+    NotDefaultArgumentData StoreConst(const std::string& name, T& var, const T& value, const ParserOptions& e = ParserOptions(), CombinerFunction(T, T) combiner = Assign<T, T>)
     {
       auto extra = e;
       extra.count(Count(Count::None));
       ArgumentPtr arg(new ArgumentStoreConst<T>(var, value, combiner));
-      AddArgument(name, arg, extra);
+      return AddArgument(name, arg, extra);
     }
 
     void AddSubParser(const std::string& name, SubParser* parser);
@@ -374,7 +387,7 @@ namespace argparse
 
     ParseStatus DoParseArgs(Arguments& arguments, Running& running) const;
 
-    Parser& AddArgument(const std::string& name, ArgumentPtr arg, const ParserOptions& extra);
+    NotDefaultArgumentData AddArgument(const std::string& name, ArgumentPtr arg, const ParserOptions& extra);
 
     std::string description_;
     std::string appname_;
@@ -389,8 +402,8 @@ namespace argparse
     StringConverter<SubParser*> sub_parsers_;
     mutable std::string sub_parser_used_;  // todo: mutable or change parseArgs to nonconst?
 
-    std::vector<Help> helpOptional_;
-    std::vector<Help> helpPositional_;
+    std::vector<std::shared_ptr<Help>> helpOptional_;
+    std::vector<std::shared_ptr<Help>> helpPositional_;
   };
 }
 
