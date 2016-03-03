@@ -169,49 +169,49 @@ namespace argparse {
     return arg[0] == '-';
   }
 
-  Extra::Extra()
+  ParserOptions::ParserOptions()
     : count_(1)
     , has_several_(false)
   {
   }
 
 
-  Extra& Extra::help(const std::string& h)
+  ParserOptions& ParserOptions::help(const std::string& h)
   {
     help_ = h;
     return *this;
   }
-  const std::string& Extra::help() const
+  const std::string& ParserOptions::help() const
   {
     return help_;
   }
 
-  Extra& Extra::count(const Count c)
+  ParserOptions& ParserOptions::count(const Count c)
   {
     count_ = c;
     return *this;
   }
-  const Count& Extra::count() const
+  const Count& ParserOptions::count() const
   {
     return count_;
   }
 
-  Extra& Extra::metavar(const std::string& metavar)
+  ParserOptions& ParserOptions::metavar(const std::string& metavar)
   {
     metaVar_ = metavar;
     return *this;
   }
 
-  const std::string& Extra::metavar() const
+  const std::string& ParserOptions::metavar() const
   {
     return metaVar_;
   }
 
-  Extra& Extra::several() {
+  ParserOptions& ParserOptions::several() {
     has_several_ = true;
     return *this;
   }
-  bool Extra::has_several() const {
+  bool ParserOptions::has_several() const {
     return has_several_;
   }
 
@@ -222,7 +222,7 @@ namespace argparse {
     return str;
   }
 
-  Help::Help(const std::string& name, const Extra& e)
+  Help::Help(const std::string& name, const ParserOptions& e)
     : name_(name)
     , help_(e.help())
     , metavar_(e.metavar())
@@ -356,7 +356,7 @@ namespace argparse {
     , sub_parsers_("subparser")
   {
     std::shared_ptr<Argument> arg(new CallHelp(this));
-    AddArgument("-h", arg, Extra().count(Count(Count::None)).help("Show this help message and exit."));
+    AddArgument("-h", arg, ParserOptions().count(Count(Count::None)).help("Show this help message and exit."));
   }
 
   void Parser::set_description(const std::string& desc) {
@@ -556,7 +556,7 @@ namespace argparse {
   }
 
 
-  Parser& Parser::AddArgument(const std::string& commands, ArgumentPtr arg, const Extra& extra)
+  Parser& Parser::AddArgument(const std::string& commands, ArgumentPtr arg, const ParserOptions& extra)
   {
     if( extra.has_several() ) {
       arg->set_has_several();
@@ -579,7 +579,7 @@ namespace argparse {
         ++positionalcount;
       }
     }
-    Extra e = extra;
+    ParserOptions e = extra;
     if (e.metavar().empty()) {
       e.metavar(thename);
     }
