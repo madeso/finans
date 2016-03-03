@@ -321,6 +321,9 @@ namespace argparse
 
     explicit Parser(const std::string& d, const std::string aappname = "");
 
+    void set_description(const std::string& desc);
+    void set_appname(const std::string& appname);
+
     template<typename T>
     void AddOption(const std::string& name, T& var, const Extra& extra = Extra(), CombinerFunction(T, T) combiner = Assign<T, T>, ConverterFunction(T) co = StandardConverter<T>)
     {

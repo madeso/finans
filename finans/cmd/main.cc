@@ -35,6 +35,7 @@ int ExceptionHandler() {
 
 class cmd_status : public argparse::SubParser {
   void AddParser(argparse::Parser& parser) override {
+    parser.set_description("Give the status of your finances");
   }
   void ParseCompleted() override {
     try {
@@ -59,6 +60,7 @@ class cmd_addcurrecy : public argparse::SubParser {
   std::string afterArg;
 
   void AddParser(argparse::Parser& parser) override {
+    parser.set_description("Add a currency to finans");
     parser.AddOption("name",       longNamneArg); //"The long name, ie. 'American Dollar'"
     parser.AddOption("short-name", shortNameArg); //"The short name ie. USD"
     parser.AddOption("before",     beforeArg   ); //"The string before a value, ie. the $ in $99"
@@ -85,7 +87,7 @@ class cmd_addaccount : public argparse::SubParser {
   std::string currencyArg;
 
   void AddParser(argparse::Parser& parser) override {
-    // "Add a account to finans"
+    parser.set_description("Add a account to finans");
     parser.AddOption("name",      longNamneArg); // "The name, ie. 'My card'"
     parser.AddOption("short-name",shortNameArg); // "The short name ie. Visa"
     parser.AddOption("currency",  currencyArg ); // "The default currency for this account"
@@ -93,7 +95,6 @@ class cmd_addaccount : public argparse::SubParser {
 
   void ParseCompleted() override {
     try {
-
       auto finans = Finans::CreateNew();
       auto currency = finans->GetCurrencyByName(currencyArg);
       if (currency == -1) throw "Unknown currency";
@@ -113,14 +114,13 @@ class cmd_addcompany : public argparse::SubParser {
   std::string currencyArg;
 
   void AddParser(argparse::Parser& parser) override {
-     // "Add a company to finans"
+    parser.set_description("Add a company to finans");
     parser.AddOption("name", nameArg); // "The name, ie. 'Acme'"
     parser.AddOption("currency", currencyArg); // "The default currency this company works in"
   }
 
   void ParseCompleted() override {
     try {
-
       auto finans = Finans::CreateNew();
       auto currency = finans->GetCurrencyByName(currencyArg);
       if (currency == -1) throw "Unknown currency";
@@ -139,13 +139,12 @@ class cmd_addcategory : public argparse::SubParser {
   std::string nameArg;
 
   void AddParser(argparse::Parser& parser) override {
-    // "Add a category/envelope to finans"
+    parser.set_description("Add a category/envelope to finans");
     parser.AddOption("name", nameArg); // "The name, ie. 'Savings'"
   }
 
   void ParseCompleted() override {
     try {
-
       auto finans = Finans::CreateNew();
       finans->AddCategory(nameArg);
       finans->Save();
@@ -166,14 +165,13 @@ public:
   cmd_install() : dontCreateSwitch(true) { }
 
   void AddParser(argparse::Parser& parser) override {
-    // "Install finans to your system"
+    parser.set_description("Install finans to your system");
     parser.AddOption("folder", folderArg); // "Where to install"
     parser.StoreConst("dont-create", dontCreateSwitch, false);
   }
 
   void ParseCompleted() override {
     try {
-
       const std::string folder = folderArg;
       const bool dontCreate = dontCreateSwitch;
 

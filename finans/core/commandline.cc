@@ -359,6 +359,14 @@ namespace argparse {
     AddArgument("-h", arg, Extra().count(Count(Count::None)).help("Show this help message and exit."));
   }
 
+  void Parser::set_description(const std::string& desc) {
+    description_ = desc;
+  }
+
+  void Parser::set_appname(const std::string& appname) {
+    appname_ = appname;
+  }
+
   Parser::ParseStatus Parser::ParseArgs(int argc, char* argv[], std::ostream& out, std::ostream& error) const
   {
     Arguments args(argc, argv);
